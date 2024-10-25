@@ -1,0 +1,10 @@
+# Ignore Python compiled files
+*.pyc
+__pycache__/
+
+# Ignore environment variables or sensitive data
+.env
+secret.py
+
+# Ignore googleTTS.py
+googleTTS.py
