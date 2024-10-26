@@ -7,6 +7,7 @@ import pygame
 from openai import OpenAI
 from secret import OPENAI_API_KEY    
 from config import CHATGPT_MESSAGES  # Import CHATGPT_MESSAGES from external config
+import os
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -50,13 +51,13 @@ def ask_question():
         
         # Display the response in the GUI
         conversation_text.config(state=tk.NORMAL)
-        conversation_text.insert(tk.END, f"\nUser Question:\n{user_question}\nChatGPT's Response:\n{chatgpt_response}\n")
+        conversation_text.insert(tk.END, f"\nUser:\n{user_question}\nResponse:\n{chatgpt_response}\n")
         conversation_text.config(state=tk.DISABLED)
 
         # Generate audio from ChatGPT's response
         generate_and_play_audio(chatgpt_response)
 
-import os
+
 
 def generate_and_play_audio(response_text):
     try:
@@ -176,6 +177,8 @@ def create_gui():
 
     window.mainloop()
 
+
+# Main loop
 if __name__ == "__main__":
     # Initialize pygame mixer once at the start of the program
     pygame.init()
