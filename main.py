@@ -1,15 +1,25 @@
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import QLabel, QPushButton, QLineEdit, QTextEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget
+from PyQt5.QtGui import QIcon  # Import QIcon for setting the window icon
 import requests
+import ctypes
 from bs4 import BeautifulSoup
-import tkinter as tk
-from tkinter import scrolledtext, ttk
 from pathlib import Path
 import pygame
+import sounddevice as sd
+from scipy.io.wavfile import write
 from openai import OpenAI
 from secret import OPENAI_API_KEY    
 from config import CHATGPT_MESSAGES  # Import CHATGPT_MESSAGES from external config
 import os
+import threading
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+# Constants
+AUDIO_FILE_PATH = Path(__file__).parent / "user_question.wav"
+is_recording = False  # Track recording state
+recording_thread = None  # Reference to the recording thread
 
 def get_recipe_html(url):
     headers = {
@@ -44,20 +54,16 @@ def send_user_input_to_chatgpt(user_input):
         return f"Error with ChatGPT request: {str(e)}"
 
 def ask_question():
-    user_question = question_entry.get().strip()
+    user_question = question_entry.text().strip()
     if user_question:
-        question_entry.delete(0, tk.END)
+        question_entry.clear()
         chatgpt_response = send_user_input_to_chatgpt(user_question)
         
         # Display the response in the GUI
-        conversation_text.config(state=tk.NORMAL)
-        conversation_text.insert(tk.END, f"\nUser:\n{user_question}\nResponse:\n{chatgpt_response}\n")
-        conversation_text.config(state=tk.DISABLED)
+        conversation_text.append(f"\nUser:\n{user_question}\nResponse:\n{chatgpt_response}\n")
 
         # Generate audio from ChatGPT's response
         generate_and_play_audio(chatgpt_response)
-
-
 
 def generate_and_play_audio(response_text):
     try:
@@ -92,90 +98,141 @@ def generate_and_play_audio(response_text):
     except Exception as e:
         print(f"Error generating or playing audio: {str(e)}")
 
+def toggle_record_audio():
+    global is_recording, recording_thread
+
+    if not is_recording:
+        # Start recording
+        record_button.setText("Stop Recording")
+        recording_thread = threading.Thread(target=start_recording)
+        recording_thread.start()
+    else:
+        # Stop recording
+        record_button.setText("Record Voice Question")
+        is_recording = False  # This will allow the recording to stop
+
+def start_recording():
+    global is_recording, audio_data, fs
+
+    fs = 22050  # Sample rate
+    duration = 60  # Set a maximum duration to prevent runaway recording (60 seconds)
+    is_recording = True
+    print("Recording...")
+
+    audio_data = sd.rec(int(duration * fs), samplerate=fs, channels=2, dtype='int16')
+    while is_recording:
+        sd.sleep(100)  # Keep recording in 100 ms chunks until stopped
+
+    # Stop recording after the user presses the button again
+    print("Recording stopped.")
+    write(AUDIO_FILE_PATH, fs, audio_data)  # Save the recorded audio to a WAV file
+    print(f"Audio recorded and saved to {AUDIO_FILE_PATH}")
+
+    # Transcribe the recorded audio and handle the response
+    transcribe_audio_and_ask_question()
+
+def transcribe_audio_and_ask_question():
+    """Transcribe the recorded audio file and send the question to ChatGPT."""
+    try:
+        with open(AUDIO_FILE_PATH, "rb") as audio_file:
+            transcription = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio_file,
+                response_format="text"
+            )
+        print(f"Transcription: {transcription}")
+
+        # Send the transcribed text to ChatGPT
+        chatgpt_response = send_user_input_to_chatgpt(transcription)
+
+        # Display the transcription and response in the conversation text area
+        conversation_text.append(f"\nUser (Voice Input):\n{transcription}\nChatGPT's Response:\n{chatgpt_response}\n")
+
+        # Generate and play audio of the response
+        generate_and_play_audio(chatgpt_response)
+    except Exception as e:
+        print(f"Error transcribing audio: {str(e)}")
 
 def display_recipe():
-    url = url_entry.get()
+    url = url_entry.text()
     html = get_recipe_html(url)
     if html:
         ingredients, instructions = parse_recipe(html)
-        ingredients_text.config(state=tk.NORMAL)
-        ingredients_text.delete(1.0, tk.END)
+        ingredients_text.clear()
 
         if ingredients:
-            ingredients_text.insert(tk.END, "Ingredients:\n" + "\n".join(ingredients) + "\n\n")
+            ingredients_text.append("Ingredients:\n" + "\n".join(ingredients) + "\n\n")
         else:
-            ingredients_text.insert(tk.END, "No ingredients found.\n\n")
+            ingredients_text.append("No ingredients found.\n\n")
         
         # Send ingredients and instructions to ChatGPT for processing
-        user_input = f"Ingredients:\n{'\n'.join(ingredients)}\n\nInstructions:\n{instructions}"
+        user_input = f"Ingredients:\n{', '.join(ingredients)}\n\nInstructions:\n{instructions}"
         chatgpt_response = send_user_input_to_chatgpt(user_input)
         
         # Insert ChatGPT's breakdown of the instructions
-        ingredients_text.insert(tk.END, f"Instructions:\n{chatgpt_response}\n")
-        ingredients_text.config(state=tk.DISABLED)
+        ingredients_text.append(f"Instructions:\n{chatgpt_response}\n")
     else:
-        conversation_text.config(state=tk.NORMAL)
-        conversation_text.insert(tk.END, "Failed to retrieve the recipe. Please check the URL and your internet connection.\n")
-        conversation_text.config(state=tk.DISABLED)
+        conversation_text.append("Failed to retrieve the recipe. Please check the URL and your internet connection.\n")
 
+
+# Function to set up the GUI
 def create_gui():
-    global url_entry, ingredients_text, conversation_text, question_entry
+    global url_entry, ingredients_text, conversation_text, question_entry, record_button
 
-    window = tk.Tk()
-    window.title("Recipe Parser and Cooking Assistant")
-    window.geometry("1000x650")
-    window.configure(bg="#f0f0f0")  # Light grey background
+    app = QtWidgets.QApplication([])
+    app.setWindowIcon(QIcon("recipe_book_icon.ico"))  # Set taskbar icon
 
-    style = ttk.Style()
-    style.configure('TFrame', background='#f0f0f0')  # Match frame background to window
-    style.configure('TLabel', background='#f0f0f0', font=('Helvetica', 12))
-    style.configure('TButton', font=('Helvetica', 12), padding=6)
+    # Use ctypes to change the taskbar icon
+    app_id = "com.example.recipeassistant"
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id) # I don't understand this at all but it changes the icon in the taskbar so that's cool
+    
+    window = QtWidgets.QWidget()
+    window.setWindowTitle("Recipe Parser and Cooking Assistant")
+    window.setWindowIcon(QIcon("recipe_book_icon.ico"))  # Set window icon
+    window.setGeometry(100, 100, 1000, 750)
 
-    # Create PanedWindow for layout
-    paned_window = ttk.PanedWindow(window, orient=tk.HORIZONTAL)
-    paned_window.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+    main_layout = QVBoxLayout()
 
-    # Left Frame for Ingredients and Instructions
-    left_frame = ttk.Frame(paned_window, padding=10)
-    paned_window.add(left_frame, weight=1)
+    # URL Entry and Parse Button
+    url_layout = QHBoxLayout()
+    url_entry = QLineEdit()
+    url_entry.setPlaceholderText("Enter Recipe URL")
+    parse_button = QPushButton("Parse Recipe")
+    parse_button.clicked.connect(display_recipe)
+    url_layout.addWidget(url_entry)
+    url_layout.addWidget(parse_button)
 
-    ttk.Label(left_frame, text="Enter Recipe URL:").grid(row=0, column=0, sticky="w", pady=5)
-    url_entry = ttk.Entry(left_frame, width=60, font=("Helvetica", 11))
-    url_entry.grid(row=1, column=0, pady=5, sticky="ew")
+    main_layout.addLayout(url_layout)
 
-    parse_button = tk.Button(left_frame, text="Parse Recipe", command=display_recipe,
-                             font=("Helvetica", 12), relief=tk.RAISED)
-    parse_button.grid(row=2, column=0, pady=10)
+    # Ingredients and Instructions Text
+    ingredients_text = QTextEdit()
+    ingredients_text.setReadOnly(True)
+    main_layout.addWidget(ingredients_text)
 
-    ingredients_text = scrolledtext.ScrolledText(left_frame, wrap=tk.WORD, width=60, height=20,
-                                                 font=("Helvetica", 11), relief=tk.GROOVE, bd=2)
-    ingredients_text.grid(row=3, column=0, pady=10, sticky="nsew")
-    ingredients_text.config(state=tk.DISABLED)
+    # Question Entry and Ask Button
+    question_layout = QHBoxLayout()
+    question_entry = QLineEdit()
+    question_entry.setPlaceholderText("Ask ChatGPT a question about the recipe")
+    ask_button = QPushButton("Ask")
+    ask_button.clicked.connect(ask_question)
+    question_layout.addWidget(question_entry)
+    question_layout.addWidget(ask_button)
 
-    # Right Frame for ChatGPT conversation
-    right_frame = ttk.Frame(paned_window, padding=10)
-    paned_window.add(right_frame, weight=1)
+    main_layout.addLayout(question_layout)
 
-    ttk.Label(right_frame, text="Ask ChatGPT a question about the recipe:").grid(row=0, column=0, sticky="w", pady=5)
-    question_entry = ttk.Entry(right_frame, width=60, font=("Helvetica", 11))
-    question_entry.grid(row=1, column=0, pady=5, sticky="ew")
+    # Record Button
+    record_button = QPushButton("Record Voice Question")
+    record_button.clicked.connect(toggle_record_audio)
+    main_layout.addWidget(record_button)
 
-    ask_button = tk.Button(right_frame, text="Ask", command=ask_question,
-                           font=("Helvetica", 12), relief=tk.RAISED)
-    ask_button.grid(row=2, column=0, pady=10)
+    # Conversation Text
+    conversation_text = QTextEdit()
+    conversation_text.setReadOnly(True)
+    main_layout.addWidget(conversation_text)
 
-    conversation_text = scrolledtext.ScrolledText(right_frame, wrap=tk.WORD, width=60, height=20,
-                                                  font=("Helvetica", 11), relief=tk.GROOVE, bd=2)
-    conversation_text.grid(row=3, column=0, pady=10, sticky="nsew")
-    conversation_text.config(state=tk.DISABLED)
-
-    # Adjust column and row weights for better resizing
-    left_frame.columnconfigure(0, weight=1)
-    left_frame.rowconfigure(3, weight=1)
-    right_frame.columnconfigure(0, weight=1)
-    right_frame.rowconfigure(3, weight=1)
-
-    window.mainloop()
+    window.setLayout(main_layout)
+    window.show()
+    app.exec_()
 
 
 # Main loop
