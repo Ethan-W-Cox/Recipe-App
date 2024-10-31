@@ -2,12 +2,12 @@
 **Your AI-powered recipe assistant for hassle-free cooking.**
 
 ## Project Description
----
+--
 This app allows the user to provide a URL to a recipe. This recipe will then be parsed to remove any unnecessary content that is often contained in online recipes and return just the ingredients and instructions. The user can then type or speak any question they may have about the recipe and the answer will be spoken back to them. This response is powered by OpenAI's speech-to-text, text-to-speech, and 4o APIs. This app streamlines the process of deciphering an online recipe page and provides helpful advice and answers during the cooking process, making you the Chef de Cuisine of your kitchen. 
 
 
 ## User Guide
----
+--
 To use YesChef, follow these steps:
 
 1. **Download the Files**: Download the project files to your desired directory.
