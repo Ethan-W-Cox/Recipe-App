@@ -14,10 +14,19 @@ from secret import OPENAI_API_KEY
 from config import CHATGPT_MESSAGES  # Import CHATGPT_MESSAGES from external config
 import threading
 import time
+import sounddevice as sd
+from scipy.io.wavfile import write
+import whisper  # Import the local Whisper model
 
 from titlebar import CustomTitleBar  # Import the custom title bar from the separate file
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+# Constants
+whisperModel = whisper.load_model("tiny")  # You can use "tiny", "base", "small", "medium", or "large"
+AUDIO_FILE_PATH = Path(__file__).parent / "user_question.wav"
+is_recording = False  # Track recording state
+recording_thread = None  # Reference to the recording thread
 
 def get_recipe_html(url):
     headers = {
@@ -124,6 +133,73 @@ def play_audio(audio_path):
     audio_thread = threading.Thread(target=play)
     audio_thread.start()
 
+def toggle_record_audio():
+    global is_recording, recording_thread
+
+    if not is_recording:
+        # Start recording
+        record_button.setText("Stop Recording")
+        is_recording = True
+        recording_thread = threading.Thread(target=start_recording)
+        recording_thread.start()
+    else:
+        # Stop recording
+        record_button.setText("Record")
+        is_recording = False  # This will allow the recording to stop
+
+def start_recording():
+    global is_recording, audio_data, fs
+
+    fs = 48000  # Sample rate
+    duration = 15  # Set a maximum duration to prevent runaway recording (15 seconds)
+    input_device_index = 6  # Set the input device index (replace with your preferred input device)
+
+    try:
+        print("Recording...")
+        audio_data = sd.rec(int(duration * fs), samplerate=fs, channels=2, dtype='int16', device=input_device_index)
+        
+        while is_recording:
+            sd.sleep(100)  # Keep recording in 100 ms chunks until stopped
+
+        # Stop recording after the user presses the button again
+        sd.stop()  # Ensure recording stops properly
+        print("Recording stopped.")
+
+        write(AUDIO_FILE_PATH, fs, audio_data)  # Save the recorded audio to a WAV file
+        print(f"Audio recorded and saved to {AUDIO_FILE_PATH}")
+
+        # Transcribe the recorded audio and handle the response
+        transcribe_audio_and_ask_question()
+
+    except Exception as e:
+        print(f"Error starting recording: {str(e)}")
+
+def transcribe_audio_and_ask_question():
+    """Transcribe the recorded audio file using the local Whisper model and send the question to ChatGPT."""
+    try:
+        # Load the Whisper model
+
+        # Transcribe the audio file
+        result = whisperModel.transcribe(audio="user_question.wav", fp16=False)
+        transcription = result["text"]
+        print(f"Transcription: {transcription}")
+
+        # Send the transcribed text to ChatGPT
+        chatgpt_response = send_user_input_to_chatgpt(transcription)
+
+        # Display the transcription and response in the conversation text area
+        conversation_text.append(f"\nUser (Voice Input):\n{transcription}\nChatGPT's Response:\n{chatgpt_response}\n")
+
+        # Generate audio from ChatGPT's response
+        audio_path = generate_audio(chatgpt_response)
+        
+        # Play the audio after the text is displayed
+        if audio_path:
+            play_audio(audio_path)
+
+    except Exception as e:
+        print(f"Error transcribing audio: {str(e)}")
+
 def display_recipe():
     url = url_entry.text()
     html = get_recipe_html(url)
@@ -147,7 +223,7 @@ def display_recipe():
 
 # Function to set up the GUI
 def create_gui():
-    global url_entry, ingredients_text, conversation_text, question_entry
+    global url_entry, ingredients_text, conversation_text, question_entry, record_button
 
     app = QtWidgets.QApplication([])
     app.setWindowIcon(QIcon("recipe_book_icon.ico"))  # Set taskbar icon
@@ -238,14 +314,17 @@ def create_gui():
     conversation_text.setFontPointSize(20)
     right_layout.addWidget(conversation_text)
 
-    # Question Entry and Ask Button
+    # Question Entry, Ask Button, and Record Button
     bottom_layout = QHBoxLayout()
     question_entry = QLineEdit()
     question_entry.setPlaceholderText("Ask ChatGPT a question about the recipe")
     ask_button = QPushButton("Ask")
     ask_button.clicked.connect(ask_question)  # Updated to call ask_question function
+    record_button = QPushButton("Record")
+    record_button.clicked.connect(toggle_record_audio)  # Toggle recording on button click
     bottom_layout.addWidget(question_entry)
     bottom_layout.addWidget(ask_button)
+    bottom_layout.addWidget(record_button)
 
     right_layout.addLayout(bottom_layout)
 
