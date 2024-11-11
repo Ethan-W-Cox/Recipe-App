@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YesChef</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="title-bar">
+        <span class="title">YesChef</span>
+    </div>
+
+    <div class="container">
+        <!-- URL Entry Section -->
+        <div class="url-section">
+            <input type="text" id="urlEntry" placeholder="Enter Recipe URL">
+            <button onclick="fetchRecipe()">Parse Recipe</button>
+        </div>
+
+        <div class="content">
+            <!-- Ingredients Section -->
+            <div class="ingredients-section">
+                <h2>Ingredients</h2>
+                <textarea id="ingredientsText" readonly></textarea>
+            </div>
+
+            <!-- ChatGPT Interaction Section -->
+            <div class="chat-section">
+                <h2>ChatGPT Interaction</h2>
+                <textarea id="conversationText" readonly></textarea>
+
+                <div class="interaction-controls">
+                    <input type="text" id="questionEntry" placeholder="Ask ChatGPT a question about the recipe">
+                    <button onclick="askQuestion()">Ask</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
