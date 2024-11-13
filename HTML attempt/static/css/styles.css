@@ -6,6 +6,8 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 /* Title bar styling */
@@ -30,7 +32,7 @@ body {
 /* GitHub Button styling */
 .github-button {
     padding: 5px 10px;
-    background-color: #666;
+    background-color: #888;
     color: #FFFFFF;
     border-radius: 8px;
     text-decoration: none;
@@ -40,11 +42,11 @@ body {
 }
 
 .github-button:hover {
-    background-color: #888;
+    background-color: #2DBA4E;
 }
 
 .github-button:active {
-    background-color: #555;
+    background-color: #2DBA01;
 }
 
 /* Main container styling */

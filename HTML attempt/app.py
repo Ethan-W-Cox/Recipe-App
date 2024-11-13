@@ -40,9 +40,6 @@ def get_recipe():
         # Send instructions to ChatGPT for formatting using CHATGPT_MESSAGES
         formatted_instructions = format_instructions_with_chatgpt(instructions_raw)
 
-        # Debugging output
-        print("Formatted Instructions:", formatted_instructions)
-
         return jsonify({
             "ingredients": ingredients,
             "instructions": formatted_instructions
