@@ -5,10 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YesChef</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon">
 </head>
 <body>
     <div class="title-bar">
-        <span class="title">YesChef</span>
+        <span class="title">YesChef
+            <img src="{{ url_for('static', filename='favicon.png') }}" alt="Chef Hat Icon" class="title-icon">
+        </span>
+        <!-- GitHub Button -->
+        <a href="https://github.com/Ethan-W-Cox/YesChef" target="_blank" class="github-button">
+            GitHub
+        </a>
     </div>
 
     <div class="container">
@@ -18,16 +25,26 @@
             <button onclick="fetchRecipe()">Parse Recipe</button>
         </div>
 
-        <div class="content">
-            <!-- Ingredients Section -->
-            <div class="ingredients-section">
-                <h2>Ingredients</h2>
-                <textarea id="ingredientsText" readonly></textarea>
+        <!-- Main Content Area with Left and Right Sections -->
+        <div class="main-content">
+            <!-- Left Section for Ingredients and Instructions -->
+            <div class="left-section">
+                <!-- Ingredients Section -->
+                <div class="ingredients-section">
+                    <h2>Ingredients</h2>
+                    <textarea id="ingredientsText" readonly></textarea>
+                </div>
+
+                <!-- Instructions Section -->
+                <div class="instructions-section">
+                    <h2>Instructions</h2>
+                    <textarea id="instructionsText" readonly></textarea>
+                </div>
             </div>
 
-            <!-- ChatGPT Interaction Section -->
-            <div class="chat-section">
-                <h2>ChatGPT Interaction</h2>
+            <!-- Right Section for ChatGPT Interaction -->
+            <div class="right-section">
+                <h2>Ask Chef</h2>
                 <textarea id="conversationText" readonly></textarea>
 
                 <div class="interaction-controls">

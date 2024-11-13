@@ -13,6 +13,7 @@ async function fetchRecipe() {
         alert(data.error);
     } else {
         document.getElementById("ingredientsText").value = "Ingredients:\n" + data.ingredients.join("\n");
+        document.getElementById("instructionsText").value = "Instructions:\n" + data.instructions;  // Display instructions
     }
 }
 
@@ -30,6 +31,9 @@ async function askQuestion() {
     if (data.error) {
         alert(data.error);
     } else {
-        document.getElementById("conversationText").value += `User: ${question}\nChatGPT: ${data.response}\n`;
+        // Append question and response to conversation text area
+        const conversationBox = document.getElementById("conversationText");
+        conversationBox.value += `User: ${question}\nChatGPT: ${data.response}\n\n`;
+        conversationBox.scrollTop = conversationBox.scrollHeight;  // Auto-scroll to the latest response
     }
 }

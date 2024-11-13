@@ -3,6 +3,9 @@ body {
     font-family: Arial, sans-serif;
     background-color: #2D2D2D;
     color: #FFFFFF;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 /* Title bar styling */
@@ -12,7 +15,36 @@ body {
     padding: 10px 20px;
     display: flex;
     align-items: center;
-    font-size: 24px;
+    justify-content: space-between; /* Space out title and button */
+    font-size: 30px;
+}
+
+/* Title Icon Styling */
+.title-icon {
+    width: 24px; /* Adjust size as needed */
+    height: 24px;
+    margin-left: 10px; /* Space between the text and icon */
+    vertical-align: left;
+}
+
+/* GitHub Button styling */
+.github-button {
+    padding: 5px 10px;
+    background-color: #666;
+    color: #FFFFFF;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.github-button:hover {
+    background-color: #888;
+}
+
+.github-button:active {
+    background-color: #555;
 }
 
 /* Main container styling */
@@ -21,22 +53,23 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 /* URL section styling */
-.url-section, .interaction-controls {
+.url-section {
     display: flex;
     gap: 10px;
 }
 
-.url-section input[type="text"],
-.interaction-controls input[type="text"],
-textarea {
+.url-section input[type="text"] {
     width: 100%;
     padding: 8px;
     background-color: #333333;
     color: #FFFFFF;
-    border-radius: 10px;
+    border-radius: 8px;
     border: 1px solid #AAA;
     font-size: 16px;
 }
@@ -46,7 +79,7 @@ button {
     padding: 8px 12px;
     background-color: #666;
     color: #FFFFFF;
-    border-radius: 10px;
+    border-radius: 8px;
     border: none;
     cursor: pointer;
     font-size: 16px;
@@ -60,30 +93,93 @@ button:active {
     background-color: #555;
 }
 
-/* Content area styling */
-.content {
+/* Main content layout with left and right sections */
+.main-content {
     display: flex;
+    gap: 20px;
+    width: 100%;
+    height: calc(100vh - 160px); /* Fill viewport minus header and URL section */
+    box-sizing: border-box;
+}
+
+/* Left section (Ingredients and Instructions) */
+.left-section {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
     gap: 20px;
 }
 
-.ingredients-section,
-.chat-section {
-    flex: 1;
+/* Ingredients and Instructions styling */
+.ingredients-section, .instructions-section {
     display: flex;
     flex-direction: column;
+    flex-grow: 1; /* Allow sections to grow and fill space */
 }
 
 .ingredients-section h2,
-.chat-section h2 {
+.instructions-section h2,
+.right-section h2 {
     font-size: 20px;
-    margin-bottom: 10px;
-    color: #FFD700; /* Gold color for section titles */
+    margin: 0; /* Ensure consistent margins on headers */
+    margin-bottom: 8px; /* Consistent spacing below headers */
+    color: #a75470;
+    padding: 0;
 }
 
-/* Text area styling */
-textarea {
-    resize: none;
-    height: 200px;
-    overflow-y: scroll;
+/* Responsive text area styling for ingredients and instructions */
+#ingredientsText, #instructionsText {
+    flex-grow: 1; /* Expands to fill available space in left section */
+    min-height: 150px; /* Set a minimum height */
+    padding: 10px;
+    background-color: #333333;
+    color: #FFFFFF;
+    border-radius: 8px;
+    border: 1px solid #AAA;
     font-size: 16px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    resize: none;
+}
+
+/* Right section (ChatGPT Interaction) */
+.right-section {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    gap: 0; /* Reduce gap to zero to ensure even spacing */
+}
+
+/* Scalable conversation text area */
+#conversationText {
+    flex-grow: 1;
+    padding: 10px;
+    background-color: #333333;
+    color: #FFFFFF;
+    border-radius: 8px;
+    border: 1px solid #AAA;
+    font-size: 16px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    resize: none;
+    margin: 0; /* Remove any extra margin */
+}
+
+/* ChatGPT Interaction controls styling */
+.interaction-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding-top: 10px; /* Control spacing above the text input box */
+}
+
+.interaction-controls input[type="text"] {
+    flex-grow: 1;
+    padding: 8px;
+    background-color: #333333;
+    color: #FFFFFF;
+    border-radius: 8px;
+    border: 1px solid #AAA;
+    font-size: 16px;
+    box-sizing: border-box;
 }
