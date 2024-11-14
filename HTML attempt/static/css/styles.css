@@ -151,44 +151,49 @@ button.parse-button:active {
     overflow-y: auto;
     box-sizing: border-box;
     resize: none;
-    pointer-events: none;
+    pointer-events: auto;
+    overflow-y: auto;
+    cursor: default;
 }
 
-/* Custom scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+/* Remove outline for specific text areas on focus */
+#ingredientsText:focus,
+#instructionsText:focus,
+#conversationText:focus {
+    outline: none; /* Removes the default outline */
+}
+
+/* Scrollbar styles for text areas */
 #ingredientsText::-webkit-scrollbar,
 #instructionsText::-webkit-scrollbar,
 #conversationText::-webkit-scrollbar {
-    width: 8px;
+    width: 12px;
+    height: 12px;
 }
 
 #ingredientsText::-webkit-scrollbar-track,
 #instructionsText::-webkit-scrollbar-track,
 #conversationText::-webkit-scrollbar-track {
     background: #33363B;
-    border-radius: 20px;
+    border-radius: 10px;
+    border: 1px solid #AAA;
 }
 
 #ingredientsText::-webkit-scrollbar-thumb,
 #instructionsText::-webkit-scrollbar-thumb,
 #conversationText::-webkit-scrollbar-thumb {
-    background-color: #555555;
-    border-radius: 20px;
-    border: 2px solid #33363B;
+    border-radius: 10px;
+    background: #666;
+    border-color: #AAA;
 }
 
 #ingredientsText::-webkit-scrollbar-thumb:hover,
 #instructionsText::-webkit-scrollbar-thumb:hover,
 #conversationText::-webkit-scrollbar-thumb:hover {
-    background-color: #888888;
+    background: #888;
 }
 
-/* Firefox scrollbar styling */
-#ingredientsText,
-#instructionsText,
-#conversationText {
-    scrollbar-width: thin;
-    scrollbar-color: #555555 #33363B;
-}
+
 
 /* Right section (ChatGPT Interaction) */
 .right-section {

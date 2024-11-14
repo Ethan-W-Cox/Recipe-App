@@ -11,7 +11,7 @@ from secret import OPENAI_API_KEY
 from config import CHATGPT_MESSAGES  # Import CHATGPT_MESSAGES from external config
 
 client = OpenAI(api_key=OPENAI_API_KEY)
-whisperModel = whisper.load_model("tiny")
+whisperModel = whisper.load_model("tiny.en")
 
 # Home route to render the main HTML page
 @app.route('/')

@@ -6,6 +6,10 @@ let audioChunks = [];
 async function fetchRecipe() {
     const url = document.getElementById("urlEntry").value;
 
+     // Clear the chat history whenever a recipe is parsed
+     const conversationBox = document.getElementById("conversationText");
+     conversationBox.value = ""; // Resets the chat history
+
     const response = await fetch('/get_recipe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -149,6 +153,28 @@ async function askQuestionWithText(text) {
         conversationBox.scrollTop = conversationBox.scrollHeight;
 
         // Uncomment to enable TTS playback for the response
-        //generateAudioForResponse(data.response);
+        generateAudioForResponse(data.response);
     }
 }
+
+// allows user to press enter to submit instead of just the buttons
+document.addEventListener('DOMContentLoaded', () => {
+    // Set up "Enter" key event for URL entry
+    const urlEntry = document.getElementById("urlEntry");
+    urlEntry.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // Prevents form submission if inside a form
+            fetchRecipe();
+        }
+    });
+
+    // Set up "Enter" key event for ChatGPT question entry
+    const questionEntry = document.getElementById("questionEntry");
+    questionEntry.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // Prevents form submission if inside a form
+            askQuestion();
+            questionEntry.value = "";
+        }
+    });
+});
