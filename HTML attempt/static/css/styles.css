@@ -1,7 +1,7 @@
 /* Overall body styling */
 body {
     font-family: Arial, sans-serif;
-    background-color: #2D2D2D;
+    background-color: #2C2F33; /* Dark background */
     color: #FFFFFF;
     margin: 0;
     padding: 0;
@@ -12,8 +12,8 @@ body {
 
 /* Title bar styling */
 .title-bar {
-    background-color: #333333;
-    color: #FFFFFF;
+    background-color: #33363B;
+    color: #E0E0E0;
     padding: 10px 20px;
     display: flex;
     align-items: center;
@@ -23,9 +23,9 @@ body {
 
 /* Title Icon Styling */
 .title-icon {
-    width: 24px; /* Adjust size as needed */
+    width: 24px;
     height: 24px;
-    margin-left: 10px; /* Space between the text and icon */
+    margin-left: 10px;
     vertical-align: left;
 }
 
@@ -69,17 +69,25 @@ body {
 .url-section input[type="text"] {
     width: 100%;
     padding: 8px;
-    background-color: #333333;
-    color: #FFFFFF;
+    background-color: #33363B;
+    color: #E0E0E0;
     border-radius: 8px;
     border: 1px solid #AAA;
     font-size: 16px;
 }
 
-/* Button styling */
-button {
+/* Focused state with thicker border */
+.url-section input[type="text"]:focus {
+    border-color: #FF6F61; /* Coral color for focused state */
+    border-width: 2px; /* Slightly thicker border on focus */
+    outline: none; /* Remove default outline */
+    padding: 7px; /* Reduce padding to maintain input size */
+}
+
+/* Primary Button styling */
+button.parse-button {
     padding: 8px 12px;
-    background-color: #666;
+    background-color: #FF6F61; /* Coral accent */
     color: #FFFFFF;
     border-radius: 8px;
     border: none;
@@ -87,12 +95,12 @@ button {
     font-size: 16px;
 }
 
-button:hover {
-    background-color: #888;
+button.parse-button:hover {
+    background-color: #E64B3B; /* Darker coral for hover */
 }
 
-button:active {
-    background-color: #555;
+button.parse-button:active {
+    background-color: #C44131; /* Muted coral for active */
 }
 
 /* Main content layout with left and right sections */
@@ -116,7 +124,7 @@ button:active {
 .ingredients-section, .instructions-section {
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* Allow sections to grow and fill space */
+    flex-grow: 1;
     pointer-events: none;
 }
 
@@ -124,18 +132,18 @@ button:active {
 .instructions-section h2,
 .right-section h2 {
     font-size: 20px;
-    margin: 0; /* Ensure consistent margins on headers */
-    margin-bottom: 8px; /* Consistent spacing below headers */
-    color: #a75470;
+    margin: 0;
+    margin-bottom: 8px;
+    color: #FF6F61; /* Soft yellow for headings */
     padding: 0;
 }
 
 /* Responsive text area styling for ingredients and instructions */
 #ingredientsText, #instructionsText, #conversationText {
-    flex-grow: 1; /* Expands to fill available space in left section */
-    min-height: 150px; /* Set a minimum height */
+    flex-grow: 1;
+    min-height: 150px;
     padding: 10px;
-    background-color: #333333;
+    background-color: #40444B; /* Dark gray for text areas */
     color: #FFFFFF;
     border-radius: 8px;
     border: 1px solid #AAA;
@@ -150,37 +158,36 @@ button:active {
 #ingredientsText::-webkit-scrollbar,
 #instructionsText::-webkit-scrollbar,
 #conversationText::-webkit-scrollbar {
-    width: 8px; /* Width of the scrollbar */
+    width: 8px;
 }
 
 #ingredientsText::-webkit-scrollbar-track,
 #instructionsText::-webkit-scrollbar-track,
 #conversationText::-webkit-scrollbar-track {
-    background: #333333; /* Background color of the scrollbar track */
-    border-radius: 20px; /* Rounds the corners of the track */
-    
+    background: #33363B;
+    border-radius: 20px;
 }
 
 #ingredientsText::-webkit-scrollbar-thumb,
 #instructionsText::-webkit-scrollbar-thumb,
 #conversationText::-webkit-scrollbar-thumb {
-    background-color: #555555; /* Color of the scrollbar thumb */
-    border-radius: 20px; /* Rounds the corners of the thumb */
-    border: 2px solid #333333; /* Adds padding around the thumb */
+    background-color: #555555;
+    border-radius: 20px;
+    border: 2px solid #33363B;
 }
 
 #ingredientsText::-webkit-scrollbar-thumb:hover,
 #instructionsText::-webkit-scrollbar-thumb:hover,
 #conversationText::-webkit-scrollbar-thumb:hover {
-    background-color: #888888; /* Changes color when hovering over the scrollbar */
+    background-color: #888888;
 }
 
 /* Firefox scrollbar styling */
 #ingredientsText,
 #instructionsText,
 #conversationText {
-    scrollbar-width: thin; /* Make the scrollbar thin */
-    scrollbar-color: #555555 #333333; /* thumb color | track color */
+    scrollbar-width: thin;
+    scrollbar-color: #555555 #33363B;
 }
 
 /* Right section (ChatGPT Interaction) */
@@ -188,24 +195,75 @@ button:active {
     display: flex;
     flex-direction: column;
     width: 50%;
-    gap: 0; /* Reduce gap to zero to ensure even spacing */
+    gap: 0;
 }
 
-/* ChatGPT Interaction controls styling */
+/* Interaction controls container styling */
 .interaction-controls {
     display: flex;
     gap: 10px;
     align-items: center;
-    padding-top: 10px; /* Control spacing above the text input box */
+    padding-top: 10px;
 }
 
+/* Text input styling */
 .interaction-controls input[type="text"] {
     flex-grow: 1;
     padding: 8px;
-    background-color: #333333;
-    color: #FFFFFF;
+    background-color: #33363B;
+    color: #E0E0E0;
     border-radius: 8px;
     border: 1px solid #AAA;
     font-size: 16px;
     box-sizing: border-box;
+}
+
+/* Focused state with thicker border */
+.interaction-controls input[type="text"]:focus {
+    border-color: #FF6F61; /* Coral color for focused state */
+    border-width: 2px; /* Slightly thicker border on focus */
+    outline: none; /* Remove default outline */
+    padding: 7px; /* Reduce padding to maintain input size */
+}
+
+/* Consistent height and centered images for buttons in interaction-controls */
+.interaction-controls button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background-color: #666;
+    color: #FFFFFF;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+/* Center images within buttons and set consistent icon size */
+.interaction-controls button img {
+    width: 20px;
+    height: 20px;
+}
+
+/* Hover and active states for buttons */
+button:hover {
+    background-color: #888;
+}
+
+button:active {
+    background-color: #555;
+}
+
+/* Default (inactive) state for the record button icon */
+#recordButton.inactive img {
+    content: url("../mic_icon.png");
+}
+
+/* Active (recording) state for the record button icon */
+#recordButton.active img {
+    content: url("../checkmark_icon.png");
 }

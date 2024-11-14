@@ -86,7 +86,8 @@ async function toggleRecording() {
     if (!isRecording) {
         // Start recording
         isRecording = true;
-        recordButton.innerHTML = '<img src="mic_icon_active.png" alt="Stop Recording" width="20" height="20">';
+        recordButton.classList.remove("inactive");
+        recordButton.classList.add("active");
 
         // Request microphone access
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -94,12 +95,12 @@ async function toggleRecording() {
         audioChunks = [];
 
         mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-        
         mediaRecorder.start();
     } else {
         // Stop recording
         isRecording = false;
-        recordButton.innerHTML = '<img src="mic_icon.png" alt="Record" width="20" height="20">';
+        recordButton.classList.remove("active");
+        recordButton.classList.add("inactive");
 
         mediaRecorder.stop();
         

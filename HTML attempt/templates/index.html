@@ -22,7 +22,7 @@
         <!-- URL Entry Section -->
         <div class="url-section">
             <input type="text" id="urlEntry" placeholder="Enter Recipe URL">
-            <button onclick="fetchRecipe()">Parse Recipe</button>
+            <button onclick="fetchRecipe()" class="parse-button">Parse Recipe</button>
         </div>
 
         <!-- Main Content Area with Left and Right Sections -->
@@ -50,8 +50,8 @@
                 <div class="interaction-controls">
                     <input type="text" id="questionEntry" placeholder="Ask ChatGPT a question about the recipe">
                     <button onclick="askQuestion()">Ask</button>
-                    <button id="recordButton" onclick="toggleRecording()">
-                        <img src="{{ url_for('static', filename='images/mic_icon.png') }}" alt="Record" width="20" height="20">
+                    <button id="recordButton" onclick="toggleRecording()" class="inactive">
+                        <img src="{{ url_for('static', filename='mic_icon.png') }}" alt="Record" width="20" height="20">
                     </button>
                 </div>
             </div>
