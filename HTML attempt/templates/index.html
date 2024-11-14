@@ -50,6 +50,9 @@
                 <div class="interaction-controls">
                     <input type="text" id="questionEntry" placeholder="Ask ChatGPT a question about the recipe">
                     <button onclick="askQuestion()">Ask</button>
+                    <button id="recordButton" onclick="toggleRecording()">
+                        <img src="{{ url_for('static', filename='images/mic_icon.png') }}" alt="Record" width="20" height="20">
+                    </button>
                 </div>
             </div>
         </div>

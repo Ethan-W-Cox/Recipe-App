@@ -46,7 +46,7 @@ body {
 }
 
 .github-button:active {
-    background-color: #2DBA01;
+    background-color: #43cb63;
 }
 
 /* Main container styling */
@@ -117,6 +117,7 @@ button:active {
     display: flex;
     flex-direction: column;
     flex-grow: 1; /* Allow sections to grow and fill space */
+    pointer-events: none;
 }
 
 .ingredients-section h2,
@@ -130,7 +131,7 @@ button:active {
 }
 
 /* Responsive text area styling for ingredients and instructions */
-#ingredientsText, #instructionsText {
+#ingredientsText, #instructionsText, #conversationText {
     flex-grow: 1; /* Expands to fill available space in left section */
     min-height: 150px; /* Set a minimum height */
     padding: 10px;
@@ -142,6 +143,44 @@ button:active {
     overflow-y: auto;
     box-sizing: border-box;
     resize: none;
+    pointer-events: none;
+}
+
+/* Custom scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+#ingredientsText::-webkit-scrollbar,
+#instructionsText::-webkit-scrollbar,
+#conversationText::-webkit-scrollbar {
+    width: 8px; /* Width of the scrollbar */
+}
+
+#ingredientsText::-webkit-scrollbar-track,
+#instructionsText::-webkit-scrollbar-track,
+#conversationText::-webkit-scrollbar-track {
+    background: #333333; /* Background color of the scrollbar track */
+    border-radius: 20px; /* Rounds the corners of the track */
+    
+}
+
+#ingredientsText::-webkit-scrollbar-thumb,
+#instructionsText::-webkit-scrollbar-thumb,
+#conversationText::-webkit-scrollbar-thumb {
+    background-color: #555555; /* Color of the scrollbar thumb */
+    border-radius: 20px; /* Rounds the corners of the thumb */
+    border: 2px solid #333333; /* Adds padding around the thumb */
+}
+
+#ingredientsText::-webkit-scrollbar-thumb:hover,
+#instructionsText::-webkit-scrollbar-thumb:hover,
+#conversationText::-webkit-scrollbar-thumb:hover {
+    background-color: #888888; /* Changes color when hovering over the scrollbar */
+}
+
+/* Firefox scrollbar styling */
+#ingredientsText,
+#instructionsText,
+#conversationText {
+    scrollbar-width: thin; /* Make the scrollbar thin */
+    scrollbar-color: #555555 #333333; /* thumb color | track color */
 }
 
 /* Right section (ChatGPT Interaction) */
@@ -150,21 +189,6 @@ button:active {
     flex-direction: column;
     width: 50%;
     gap: 0; /* Reduce gap to zero to ensure even spacing */
-}
-
-/* Scalable conversation text area */
-#conversationText {
-    flex-grow: 1;
-    padding: 10px;
-    background-color: #333333;
-    color: #FFFFFF;
-    border-radius: 8px;
-    border: 1px solid #AAA;
-    font-size: 16px;
-    overflow-y: auto;
-    box-sizing: border-box;
-    resize: none;
-    margin: 0; /* Remove any extra margin */
 }
 
 /* ChatGPT Interaction controls styling */

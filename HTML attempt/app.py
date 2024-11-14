@@ -1,18 +1,71 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
+import tempfile
 import requests
 from bs4 import BeautifulSoup
 from openai import OpenAI
+from pathlib import Path
+import whisper
 
 app = Flask(__name__)
 from secret import OPENAI_API_KEY
 from config import CHATGPT_MESSAGES  # Import CHATGPT_MESSAGES from external config
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+whisperModel = whisper.load_model("tiny")
 
 # Home route to render the main HTML page
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+# Route to transcribe audio and send the transcription to ChatGPT
+@app.route('/transcribe_audio', methods=['POST'])
+def transcribe_audio():
+    audio_file = request.files['audio']
+
+    # Save the audio to a temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as temp_audio_file:
+        audio_file.save(temp_audio_file.name)
+        audio_path = temp_audio_file.name
+
+    # Transcribe the audio using Whisper
+    try:
+        result = whisperModel.transcribe(audio_path)
+        transcription = result["text"]
+        return jsonify({"transcription": transcription})
+    except Exception as e:
+        return jsonify({"error": f"Error transcribing audio: {str(e)}"}), 500
+
+
+#Route to generate TTS audio
+# @app.route('/generate_audio', methods=['POST'])
+# def generate_audio():
+#     data = request.get_json()
+#     text = data.get('text')
+
+#     try:
+#         # Generate TTS from response using OpenAI’s TTS model
+#         response = client.audio.speech.create(
+#             model="tts-1",
+#             voice="nova",
+#             input=text
+#         )
+
+#         # Save the audio to a temporary file
+#         temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+#         temp_audio_file.write(response.content)
+#         temp_audio_file.close()
+
+#         # Serve the audio file to the client
+#         return send_file(temp_audio_file.name, mimetype="audio/mpeg")
+
+#     except Exception as e:
+#         return jsonify({"error": f"Error generating audio: {str(e)}"}), 500
+
+
+
+
 
 # Route to fetch and parse recipe ingredients and instructions
 @app.route('/get_recipe', methods=['POST'])
@@ -62,11 +115,12 @@ def ask_question():
             max_tokens=2048
         )
         answer = response.choices[0].message.content.strip()
-
         return jsonify({"response": answer})
-
+    
     except Exception as e:
         return jsonify({"error": f"Error with ChatGPT request: {str(e)}"}), 500
+
+
 
 def get_recipe_html(url):
     # Use a session and headers to mimic a real browser request
@@ -87,6 +141,8 @@ def get_recipe_html(url):
         return None
 
 def format_instructions_with_chatgpt(instructions):
+
+    print(instructions)
     CHATGPT_MESSAGES.append({"role": "user", "content": instructions})
     try:
         completion = client.chat.completions.create(
