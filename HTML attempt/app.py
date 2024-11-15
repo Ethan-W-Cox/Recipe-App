@@ -5,13 +5,56 @@ from bs4 import BeautifulSoup
 from openai import OpenAI
 from pathlib import Path
 import whisper
+import threading
+import pvporcupine
+import pyaudio
+import struct
+import os
 
 app = Flask(__name__)
 from secret import OPENAI_API_KEY
+from secret import PICOVOICE_ACCESS_KEY
 from config import CHATGPT_MESSAGES  # Import CHATGPT_MESSAGES from external config
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 whisperModel = whisper.load_model("tiny.en")
+
+#PORCUPINE_ACCESS_KEY = PICOVOICE_ACCESS_KEY
+#KEYWORD_PATH = ["HTML attempt\Hey-chef_en_windows_v3_0_0.ppn"]
+
+
+
+# def porcupine_listener():
+#     porcupine = pvporcupine.create(access_key=PORCUPINE_ACCESS_KEY, keyword_paths=KEYWORD_PATH)
+#     pa = pyaudio.PyAudio()
+#     previousAudio = ""
+#     audio_stream = pa.open(
+#                     rate=porcupine.sample_rate,
+#                     channels=1,
+#                     format=pyaudio.paInt16,
+#                     input=True,
+#                     frames_per_buffer=porcupine.frame_length)
+    
+#     try:
+#         while True:
+#             keyword = audio_stream.read(porcupine.frame_length)
+#             keyword = struct.unpack_from("h" * porcupine.frame_length, keyword)
+#             keyword_index = porcupine.process(keyword)
+#             if keyword_index == 0 and keyword != previousAudio:
+#                 print("Wake word detected!")
+#                 previousAudio = keyword
+#                 # Trigger a response or set a flag here
+#                 # Example: Send a signal or update a variable for the Flask app to use
+#     finally:
+#         audio_stream.close()
+#         pa.terminate()
+#         porcupine.delete()
+
+# # Start the listener thread
+# listener_thread = threading.Thread(target=porcupine_listener)
+# listener_thread.daemon = True
+# listener_thread.start()
+
 
 # Home route to render the main HTML page
 @app.route('/')
@@ -156,6 +199,9 @@ def format_instructions_with_chatgpt(instructions):
     except Exception as e:
         print(f"Error formatting instructions with ChatGPT: {e}")
         return instructions  # Fallback to raw instructions if there's an error 
+    
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
