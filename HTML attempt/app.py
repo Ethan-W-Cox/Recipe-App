@@ -20,7 +20,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 whisperModel = whisper.load_model("tiny.en")
 
 PORCUPINE_ACCESS_KEY = PICOVOICE_ACCESS_KEY
-KEYWORD_PATH = ["HTML attempt\Hey-chef_en_windows_v3_0_0.ppn"]
+KEYWORD_PATH = ["Hey-chef_en_windows_v3_0_0.ppn"]
 
 
 
@@ -50,10 +50,10 @@ def porcupine_listener():
         pa.terminate()
         porcupine.delete()
 
-# # Start the listener thread
-# listener_thread = threading.Thread(target=porcupine_listener)
-# listener_thread.daemon = True
-# listener_thread.start()
+# Start the listener thread
+listener_thread = threading.Thread(target=porcupine_listener)
+listener_thread.daemon = True
+listener_thread.start()
 
 
 # Home route to render the main HTML page
@@ -83,28 +83,29 @@ def transcribe_audio():
 
 #Route to generate TTS audio
 # @app.route('/generate_audio', methods=['POST'])
-# def generate_audio():
-#     data = request.get_json()
-#     text = data.get('text')
+@app.route('/generate_audio', methods=['POST'])
+def generate_audio():
+    data = request.get_json()
+    text = data.get('text')
 
-#     try:
-#         # Generate TTS from response using OpenAI’s TTS model
-#         response = client.audio.speech.create(
-#             model="tts-1",
-#             voice="nova",
-#             input=text
-#         )
+    try:
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice="nova",
+            input=text
+        )
 
-#         # Save the audio to a temporary file
-#         temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-#         temp_audio_file.write(response.content)
-#         temp_audio_file.close()
+        # Write audio to a temporary file
+        temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+        temp_audio_file.write(response.content)
+        temp_audio_file.close()
 
-#         # Serve the audio file to the client
-#         return send_file(temp_audio_file.name, mimetype="audio/mpeg")
+        # Return the audio file directly
+        return send_file(temp_audio_file.name, mimetype="audio/mpeg")
 
-#     except Exception as e:
-#         return jsonify({"error": f"Error generating audio: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Error generating audio: {str(e)}"}), 500
+
 
 
 
@@ -158,10 +159,20 @@ def ask_question():
             max_tokens=2048
         )
         answer = response.choices[0].message.content.strip()
+
+        # If the response is numeric, treat it as a timer duration
+        if question.lower().find("timer") != -1 and answer.isdigit():
+            numeric_value = int(answer)
+            print(f"Numeric value for timer duration from ChatGPT: {numeric_value}")  # Print statement
+            return jsonify({"timer_duration": numeric_value})
+
+        # Otherwise, return the ChatGPT response as a regular answer
         return jsonify({"response": answer})
     
     except Exception as e:
         return jsonify({"error": f"Error with ChatGPT request: {str(e)}"}), 500
+
+
 
 
 

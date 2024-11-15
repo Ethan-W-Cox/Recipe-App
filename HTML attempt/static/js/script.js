@@ -30,7 +30,7 @@ async function fetchRecipe() {
     }
 }
 
-// Function to send a question to ChatGPT and display the response
+// Function to send a question or command to ChatGPT and handle the response
 async function askQuestion() {
     const question = document.getElementById("questionEntry").value;
 
@@ -42,17 +42,27 @@ async function askQuestion() {
 
     const data = await response.json();
 
+    const conversationBox = document.getElementById("conversationText");
+    conversationBox.value += `User: ${question}\n`;
+
     if (data.error) {
         alert(data.error);
+    } else if (data.timer_duration) {
+        // Start the timer if ChatGPT returns a numeric duration
+        startCountdown(data.timer_duration);
+        conversationBox.value += `Timer started for ${formatDuration(data.timer_duration)}.\n\n`;
+        generateAudioForResponse(`Timer started for ${formatDuration(data.timer_duration)}.`);
+    } else if (data.response) {
+        // Handle a normal ChatGPT response
+        conversationBox.value += `ChatGPT: ${data.response}\n\n`;
+        generateAudioForResponse(data.response);
     } else {
-        // Append question and response to conversation text area
-        const conversationBox = document.getElementById("conversationText");
-        conversationBox.value += `User: ${question}\nChatGPT: ${data.response}\n\n`;
-        conversationBox.scrollTop = conversationBox.scrollHeight;  // Auto-scroll to the latest response
-
-        // Generate audio for the response
-        //generateAudioForResponse(data.response); // Uncomment to enable TTS playback
+        conversationBox.value += `ChatGPT: Sorry, I couldn't understand that.\n\n`;
     }
+    conversationBox.scrollTop = conversationBox.scrollHeight;
+
+    // Clear the input field after submission
+    document.getElementById("questionEntry").value = "";
 }
 
 // Function to request TTS audio from the server and play it
@@ -70,17 +80,17 @@ async function generateAudioForResponse(responseText) {
 
             console.log("Playing audio from URL:", audioUrl);
 
-            // Play the audio using an HTML audio element
             const audio = new Audio(audioUrl);
-            await audio.play();  // Await ensures any errors in playback are caught
+            await audio.play();
 
             audio.onended = () => {
                 console.log("Audio playback finished.");
-                URL.revokeObjectURL(audioUrl);  // Clean up URL to release memory
+                URL.revokeObjectURL(audioUrl);
             };
         } else {
-            const errorData = await audioResponse.json();
-            console.error("Error generating audio:", errorData);
+            // Log HTML error response if JSON parsing fails
+            const errorText = await audioResponse.text();
+            console.error("Error generating audio:", errorText);
         }
     } catch (error) {
         console.error("Error fetching audio:", error);
@@ -119,7 +129,7 @@ async function toggleRecording() {
     }
 }
 
-// Function to send recorded audio to the server for transcription
+
 async function sendAudioForTranscription(audioBlob) {
     const formData = new FormData();
     formData.append("audio", audioBlob);
@@ -134,10 +144,36 @@ async function sendAudioForTranscription(audioBlob) {
     if (data.error) {
         alert(data.error);
     } else {
-        // Send transcription to ChatGPT as if it was a regular text question
-        askQuestionWithText(data.transcription);
+        const transcription = data.transcription;
+
+        // Display transcription in chatbox
+        const conversationBox = document.getElementById("conversationText");
+        conversationBox.value += `User: ${transcription}\n`;
+        conversationBox.scrollTop = conversationBox.scrollHeight;
+
+        // Send transcription to ChatGPT
+        const response = await fetch('/ask_question', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: transcription })
+        });
+
+        const chatData = await response.json();
+
+        if (chatData.timer_duration) {
+            startCountdown(chatData.timer_duration);
+        } else if (chatData.response) {
+            conversationBox.value += `ChatGPT: ${chatData.response}\n\n`;
+
+            // Trigger TTS for spoken responses
+            generateAudioForResponse(chatData.response);
+        } else {
+            conversationBox.value += `ChatGPT: Sorry, I couldn't understand that.\n\n`;
+        }
+        conversationBox.scrollTop = conversationBox.scrollHeight;
     }
 }
+
 
 // Sends the transcribed text as if it were a regular text input
 async function askQuestionWithText(text) {
@@ -241,6 +277,26 @@ function startCountdown(duration) {
     isPaused = false; // Reset pause state
     updateTimerDisplay(remainingTime); // Update display immediately
 
+    // Make the timer control buttons visible at the start
+    document.getElementById('pauseButton').style.visibility = 'visible';
+    document.getElementById('stopButton').style.visibility = 'visible';
+
+    // Convert duration to hours, minutes, and seconds for a human-readable message
+    const hours = Math.floor(duration / 3600);
+    const minutes = Math.floor((duration % 3600) / 60);
+    const seconds = duration % 60;
+    let durationText = 'Timer started for ';
+
+    // Construct the message
+    if (hours > 0) durationText += `${hours} hour${hours > 1 ? 's' : ''} `;
+    if (minutes > 0) durationText += `${minutes} minute${minutes > 1 ? 's' : ''} `;
+    if (seconds > 0) durationText += `${seconds} second${seconds > 1 ? 's' : ''}.`;
+
+    // Display the same message in the chat box and speak it
+    const conversationBox = document.getElementById("conversationText");
+    conversationBox.value += `${durationText}\n\n`;
+    generateAudioForResponse(durationText); // Speak the message
+
     // Start a new countdown interval
     timerInterval = setInterval(() => {
         if (!isPaused) {
@@ -249,12 +305,17 @@ function startCountdown(duration) {
             if (remainingTime < 0) {
                 clearInterval(timerInterval);
                 timerDisplay.textContent = "00:00:00"; // Reset display on timer end
+
+                // Hide the timer control buttons when the timer ends
+                document.getElementById('pauseButton').style.visibility = 'hidden';
+                document.getElementById('stopButton').style.visibility = 'hidden';
             } else {
                 updateTimerDisplay(remainingTime);
             }
         }
     }, 1000);
 }
+
 
 function togglePauseTimer() {
     isPaused = !isPaused; // Toggle pause state
@@ -279,15 +340,13 @@ function stopTimer() {
     remainingTime = 0;                      // Reset the remaining time
     timerDisplay.textContent = "00:00:00";  // Reset the display to initial state
 
-    // Reset to show pause icon and hide play icon
-    document.getElementById('pauseIcon').style.display = 'inline';
-    document.getElementById('playIcon').style.display = 'none';
-
-    isPaused = false;                       // Reset pause state
-
-    // Hide the pause and stop buttons
+    // Hide the timer control buttons when the timer is stopped
     document.getElementById('pauseButton').style.visibility = 'hidden';
     document.getElementById('stopButton').style.visibility = 'hidden';
+
+    isPaused = false;                       // Reset pause state
+    document.getElementById('pauseIcon').style.display = 'inline'; // Show pause icon
+    document.getElementById('playIcon').style.display = 'none';    // Hide play icon
 }
 
 // Initial setup: hide pause and stop buttons until a timer is started
