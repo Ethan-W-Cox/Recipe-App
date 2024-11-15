@@ -19,6 +19,13 @@ body {
     align-items: center;
     justify-content: space-between; /* Space out title and button */
     font-size: 30px;
+    position: relative;
+}
+
+.title {
+    margin-right: auto;
+    display: flex;
+    align-items: center;
 }
 
 /* Title Icon Styling */
@@ -265,10 +272,181 @@ button:active {
 
 /* Default (inactive) state for the record button icon */
 #recordButton.inactive img {
-    content: url("../mic_icon.png");
+    content: url("../images/mic_icon.png");
 }
 
 /* Active (recording) state for the record button icon */
 #recordButton.active img {
-    content: url("../checkmark_icon.png");
+    content: url("../images/checkmark_icon.png");
+}
+
+
+
+/* Timer button styling */
+.timer-button {
+    padding: 5px 10px;
+    background-color: #FF6F61; /* Coral accent */
+    color: #FFFFFF;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 10px; /* Add space between timer and GitHub buttons */
+}
+
+.timer-button:hover {
+    background-color: #E64B3B;
+}
+
+.timer-button:active {
+    background-color: #C44131;
+}
+
+/* Timer Control Buttons */
+.timer-control-button {
+    visibility: hidden;
+    width: 30px;
+    height: 30px;
+    background-color: #FF6F61;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    padding: 0;
+}
+
+.timer-control-button:hover {
+    background-color: #E64B3B;
+}
+
+.timer-control-button:active {
+    background-color: #C44131;
+}
+
+
+/* Pause button default (paused) state */
+.timer-control-button.pause img {
+    content: url("../images/pause_icon.png");
+}
+
+/* Play button state */
+.timer-control-button.play img {
+    content: url("../images/play_icon.png") ;
+}
+
+/* Custom alignment for play icon */
+.icon-play {
+    margin-left: 2px; /* Adjust if needed */
+    position: relative;
+}
+
+
+
+
+/* Timer display styling when countdown is active */
+.timer-display {
+    flex-grow: 1;
+    font-size: 18px;
+    color: #FF6F61;
+    text-align: center;
+    font-weight: bold;   
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Timer Popup Container */
+#timerPopup {
+    background-color: #33363B;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: #FFFFFF;
+    width: 300px;
+    text-align: center;
+    z-index: 1001;
+}
+
+/* Timer Popup Backdrop */
+#timerBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+}
+
+/* Popup Header */
+#timerPopup h3 {
+    margin: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #FF6F61; /* Accent color */
+    text-align: center;
+}
+
+/* Timer Input Fields */
+.timer-inputs {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.timer-inputs input {
+    width: 60px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #AAA;
+    background-color: #2C2F33; /* Background to match theme */
+    color: #FFFFFF;
+    font-size: 16px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* Start Timer Button */
+#timerPopup button {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #FF6F61; /* Accent color */
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: center;
+}
+
+#timerPopup button:hover {
+    background-color: #E64B3B; /* Darker coral for hover */
+}
+
+#timerPopup button:active {
+    background-color: #C44131; /* Muted coral for active */
+}
+
+/* Close the popup with a background click */
+#timerPopup:before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    z-index: -1;
+    display: none; /* Shown only when popup is visible */
 }

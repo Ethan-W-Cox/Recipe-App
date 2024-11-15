@@ -1,6 +1,10 @@
 let isRecording = false;
 let mediaRecorder;
 let audioChunks = [];
+let timerInterval; // Holds the timer interval
+let timerDisplay =  document.querySelector('.timer-display'); // Reference to display the timer in the title bar
+let isPaused = false; // Tracks the pause state
+let remainingTime = 0; // Tracks remaining time when paused
 
 // Function to fetch and parse recipe from a URL
 async function fetchRecipe() {
@@ -178,3 +182,117 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+// Function to open the timer popup
+function openTimerPopup() {
+    document.getElementById('timerBackdrop').style.display = 'flex';
+}
+
+// Function to close the timer popup
+function closeTimerPopup() {
+    document.getElementById('timerBackdrop').style.display = 'none';
+}
+
+// Function to start the timer and close the popup
+function startTimer() {
+    const hours = parseInt(document.getElementById('hoursInput').value) || 0;
+    const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+    const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+
+    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+    if (totalSeconds > 0) {
+        updateTimerDisplay(totalSeconds); // Initialize display
+        startCountdown(totalSeconds);
+        
+        // Reset to show pause icon and hide play icon
+        const pauseIcon = document.getElementById('pauseIcon');
+        const playIcon = document.getElementById('playIcon');
+        pauseIcon.style.display = 'inline';
+        playIcon.style.display = 'none';
+
+        isPaused = false; // Ensure timer starts in running state
+
+        // Show the pause and stop buttons
+        document.getElementById('pauseButton').style.visibility = 'visible';
+        document.getElementById('stopButton').style.visibility = 'visible';
+    }
+
+    closeTimerPopup(); // Close the popup after setting the timer
+}
+
+
+
+// Function to format and update the timer display
+function updateTimerDisplay(timeLeft) {
+    const hours = Math.floor(timeLeft / 3600);
+    const minutes = Math.floor((timeLeft % 3600) / 60);
+    const seconds = timeLeft % 60;
+    timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Function to start a new timer with the specified duration
+function startCountdown(duration) {
+    // Clear any existing timer
+    if (timerInterval) clearInterval(timerInterval);
+
+    remainingTime = duration;
+    isPaused = false; // Reset pause state
+    updateTimerDisplay(remainingTime); // Update display immediately
+
+    // Start a new countdown interval
+    timerInterval = setInterval(() => {
+        if (!isPaused) {
+            remainingTime--;
+
+            if (remainingTime < 0) {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = "00:00:00"; // Reset display on timer end
+            } else {
+                updateTimerDisplay(remainingTime);
+            }
+        }
+    }, 1000);
+}
+
+function togglePauseTimer() {
+    isPaused = !isPaused; // Toggle pause state
+    const pauseIcon = document.getElementById('pauseIcon');
+    const playIcon = document.getElementById('playIcon');
+    
+    // Toggle visibility of play/pause icons
+    if (isPaused) {
+        // Show play icon (paused state)
+        pauseIcon.style.display = 'none';
+        playIcon.style.display = 'inline';
+    } else {
+        // Show pause icon (resumed state)
+        pauseIcon.style.display = 'inline';
+        playIcon.style.display = 'none';
+    }
+}
+
+// Function to stop the timer and reset display
+function stopTimer() {
+    clearInterval(timerInterval);           // Clear the timer interval
+    remainingTime = 0;                      // Reset the remaining time
+    timerDisplay.textContent = "00:00:00";  // Reset the display to initial state
+
+    // Reset to show pause icon and hide play icon
+    document.getElementById('pauseIcon').style.display = 'inline';
+    document.getElementById('playIcon').style.display = 'none';
+
+    isPaused = false;                       // Reset pause state
+
+    // Hide the pause and stop buttons
+    document.getElementById('pauseButton').style.visibility = 'hidden';
+    document.getElementById('stopButton').style.visibility = 'hidden';
+}
+
+// Initial setup: hide pause and stop buttons until a timer is started
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('pauseButton').style.visibility = 'hidden';
+    document.getElementById('stopButton').style.visibility = 'hidden';
+});
+

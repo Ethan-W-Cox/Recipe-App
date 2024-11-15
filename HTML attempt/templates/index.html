@@ -5,17 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YesChef</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/x-icon">
 </head>
 <body>
     <div class="title-bar">
         <span class="title">YesChef
-            <img src="{{ url_for('static', filename='favicon.png') }}" alt="Chef Hat Icon" class="title-icon">
+            <img src="{{ url_for('static', filename='images/favicon.png') }}" alt="Chef Hat Icon" class="title-icon">
         </span>
+        <!-- Centered Timer Display -->
+        <div class="timer-display">00:00:00</div>
+    
+        <!-- Pause and Stop Buttons -->
+        <button class="timer-control-button" id="pauseButton" onclick="togglePauseTimer()">
+            <img src="{{ url_for('static', filename='images/pause_icon.png') }}" alt="Pause" class="icon-pause" id="pauseIcon" width="20px" height="20px">
+            <img src="{{ url_for('static', filename='images/play_icon.png') }}" alt="Play" class="icon-play" id="playIcon" width="20px" height="20px" style="display: none;">
+        </button>
+            
+        <button class="timer-control-button" id="stopButton" onclick="stopTimer()">
+            <img src="{{ url_for('static', filename='images/stop_icon.png') }}" alt="Stop" width="16px" height="16px">
+        </button>
+
+        <!-- Timer Button -->
+        <button class="timer-button" onclick="openTimerPopup()">Timer</button>
         <!-- GitHub Button -->
-        <a href="https://github.com/Ethan-W-Cox/YesChef" target="_blank" class="github-button">
-            GitHub
-        </a>
+        <a href="https://github.com/Ethan-W-Cox/YesChef" target="_blank" class="github-button">GitHub</a>
+    </div>
+
+    <!-- Timer Popup Backdrop and Popup Container -->
+    <div id="timerBackdrop" style="display: none;" onclick="closeTimerPopup()">
+        <div id="timerPopup" onclick="event.stopPropagation()">
+            <h3>Set Timer</h3>
+            <div class="timer-inputs">
+                <input type="number" id="hoursInput" placeholder="HH" min="0">
+                <input type="number" id="minutesInput" placeholder="MM" min="0" max="59">
+                <input type="number" id="secondsInput" placeholder="SS" min="0" max="59">
+            </div>
+            <button onclick="startTimer()">Start Timer</button>
+        </div>
     </div>
 
     <div class="container">
@@ -51,7 +77,7 @@
                     <input type="text" id="questionEntry" placeholder="Ask ChatGPT a question about the recipe">
                     <button onclick="askQuestion()">Ask</button>
                     <button id="recordButton" onclick="toggleRecording()" class="inactive">
-                        <img src="{{ url_for('static', filename='mic_icon.png') }}" alt="Record" width="20" height="20">
+                        <img src="{{ url_for('static', filename='images/mic_icon.png') }}" alt="Record" width="20" height="20">
                     </button>
                 </div>
             </div>
