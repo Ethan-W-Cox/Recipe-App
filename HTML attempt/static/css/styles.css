@@ -39,7 +39,7 @@ body {
 /* GitHub Button styling */
 .github-button {
     padding: 5px 10px;
-    background-color: #888;
+    background-color: #6C757D;
     color: #FFFFFF;
     border-radius: 8px;
     text-decoration: none;
@@ -141,9 +141,50 @@ button.parse-button:active {
     font-size: 20px;
     margin: 0;
     margin-bottom: 8px;
-    color: #FF6F61; /* Soft yellow for headings */
+    color: #FF6F61; 
     padding: 0;
 }
+
+/* Chatbox Styling */
+.chatbox {
+    background-color: #40444B;
+    border-radius: 8px;
+    padding: 10px;
+    height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Common message styling */
+.message {
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 400px;
+    word-wrap: break-word;
+    font-size: 14px;
+}
+
+/* User message (aligned to the right) */
+.user-message {
+    align-self: flex-end;
+    background-color: #6C757D;
+    color: #FFFFFF;
+}
+
+/* ChatGPT message (aligned to the left) */
+.chatgpt-message {
+    align-self: flex-start;
+    background-color: #33363B;
+    color: #FFFFFF;
+}
+
+/* Hide any empty message elements */
+.message:empty {
+    display: none;
+}
+
 
 /* Responsive text area styling for ingredients and instructions */
 #ingredientsText, #instructionsText, #conversationText {
@@ -246,7 +287,7 @@ button.parse-button:active {
     width: 40px;
     height: 40px;
     padding: 0;
-    background-color: #666;
+    background-color: #6C757D;
     color: #FFFFFF;
     border-radius: 8px;
     border: none;
@@ -263,11 +304,11 @@ button.parse-button:active {
 
 /* Hover and active states for buttons */
 button:hover {
-    background-color: #888;
+    background-color: #5A6268;
 }
 
 button:active {
-    background-color: #555;
+    background-color: #4e5458;
 }
 
 /* Default (inactive) state for the record button icon */
@@ -285,7 +326,7 @@ button:active {
 /* Timer button styling */
 .timer-button {
     padding: 5px 10px;
-    background-color: #FF6F61; /* Coral accent */
+    background-color: #6C757D; /* Coral accent */
     color: #FFFFFF;
     border-radius: 8px;
     border: none;
@@ -295,11 +336,11 @@ button:active {
 }
 
 .timer-button:hover {
-    background-color: #E64B3B;
+    background-color: #5A6268;
 }
 
 .timer-button:active {
-    background-color: #C44131;
+    background-color: #4e5458;
 }
 
 /* Timer Control Buttons */
@@ -320,7 +361,7 @@ button:active {
     padding: 0;
 }
 
-.timer-control-button:hover {
+.timer-control-button.pause {
     background-color: #E64B3B;
 }
 
@@ -344,9 +385,6 @@ button:active {
     margin-left: 2px; /* Adjust if needed */
     position: relative;
 }
-
-
-
 
 /* Timer display styling when countdown is active */
 .timer-display {
@@ -449,4 +487,24 @@ button:active {
     background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
     z-index: -1;
     display: none; /* Shown only when popup is visible */
+}
+
+
+/* Gradient animation */
+@keyframes loading-gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 200% 50%; /* Ensures the gradient cycles smoothly */
+    }
+}
+
+/* Loading animation styling for text areas */
+.loading {
+    background: linear-gradient(45deg, #40444B 25%, #666 50%, #40444B 75%);
+    background-size: 400% 100%; /* Make the background size larger for a continuous effect */
+    animation: loading-gradient 3s linear infinite; /* Linear for seamless looping */
+    color: transparent; /* Hide text during animation */
+    pointer-events: none; /* Prevent interaction while loading */
 }
