@@ -40,7 +40,7 @@ async function fetchRecipe() {
             alert(data.error);
         } else {
             // Populate the ingredients and instructions boxes
-            ingredientsBox.value = data.ingredients.join("\n");
+            ingredientsBox.value = data.ingredients;
             instructionsBox.value = data.instructions;
         }
     } catch (error) {
