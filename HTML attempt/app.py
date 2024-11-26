@@ -199,7 +199,7 @@ def format_recipe_with_chatgpt(raw_text):
         prompt = (
             "You are a helpful assistant for formatting recipes. Do not use markdown. Format the provided recipe based on the provided text. Do not title the sections.\n"
             "Provide a bulleted list of ingredients in the following format: '- Ingredient' newline '- Ingredient' newline '- Ingredient' and so on. "
-            "Number the steps clearly in the following format: 1. 'instructions for step 1.' newline 2. 'instructions for step 2' newline and so on."
+            "Number the steps clearly in the following format: 1. 'instructions for step 1' newline 2. 'instructions for step 2' newline and so on."
             "Make sure the instructions match the original instructions from the raw text."
             "Here is the recipe text:"
             f"{raw_text}"

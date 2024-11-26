@@ -6,6 +6,10 @@ let timerDisplay =  document.querySelector('.timer-display'); // Reference to di
 let isPaused = false; // Tracks the pause state
 let remainingTime = 0; // Tracks remaining time when paused
 
+// Create a global audio object for the alarm
+const alarmSound = new Audio('/static/audio/alarm.mp3');
+alarmSound.loop = true; // Loop the alarm sound continuously
+
 // Function to fetch and parse recipe from a URL
 async function fetchRecipe() {
     const url = document.getElementById("urlEntry").value;
@@ -237,29 +241,6 @@ async function sendAudioForTranscription(audioBlob) {
     }
 }
 
-
-// Sends the transcribed text as if it were a regular text input
-// async function askQuestionWithText(text) {
-//     const response = await fetch('/ask_question', {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({ question: text })
-//     });
-
-//     const data = await response.json();
-
-//     if (data.error) {
-//         alert(data.error);
-//     } else {
-//         const conversationBox = document.getElementById("conversationText");
-//         conversationBox.value += `User: ${text}\nChatGPT: ${data.response}\n\n`;
-//         conversationBox.scrollTop = conversationBox.scrollHeight;
-
-//         // Uncomment to enable TTS playback for the response
-//         generateAudioForResponse(data.response);
-//     }
-// }
-
 // allows user to press enter to submit instead of just the buttons
 document.addEventListener('DOMContentLoaded', () => {
     // Set up "Enter" key event for URL entry
@@ -368,10 +349,11 @@ function startCountdown(duration) {
             if (remainingTime < 0) {
                 clearInterval(timerInterval);
                 timerDisplay.textContent = "00:00:00"; // Reset display on timer end
+                alarmSound.play();
 
-                // Hide the timer control buttons when the timer ends
+                // Hide the pause button when the timer ends
                 document.getElementById('pauseButton').style.visibility = 'hidden';
-                document.getElementById('stopButton').style.visibility = 'hidden';
+                //document.getElementById('stopButton').style.visibility = 'hidden';
             } else {
                 updateTimerDisplay(remainingTime);
             }
@@ -402,6 +384,7 @@ function stopTimer() {
     clearInterval(timerInterval);           // Clear the timer interval
     remainingTime = 0;                      // Reset the remaining time
     timerDisplay.textContent = "00:00:00";  // Reset the display to initial state
+    alarmSound.pause();
 
     // Hide the timer control buttons when the timer is stopped
     document.getElementById('pauseButton').style.visibility = 'hidden';
