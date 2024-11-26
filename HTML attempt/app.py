@@ -208,7 +208,7 @@ def format_recipe_with_chatgpt(raw_text):
         # Call the OpenAI model
         completion = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[
+            messages = CHATGPT_MESSAGES + [
                 {"role": "system", "content": "You are a helpful assistant for formatting recipes."},
                 {"role": "user", "content": prompt}
             ],
@@ -221,9 +221,13 @@ def format_recipe_with_chatgpt(raw_text):
         ingredients = ""
         instructions = ""
         sections = response_content.split("\n\n")  # Assuming GPT uses double newlines to separate sections
-
+        
         ingredients = sections[0]
         instructions = sections[1]
+
+        # Add ingredients and instructions to context
+        CHATGPT_MESSAGES.append({"role": "assistant", "content": instructions})
+        CHATGPT_MESSAGES.append({"role": "assistant", "content": ingredients})
         return {
             "ingredients": ingredients,  # Convert to list
             "instructions": instructions  # Convert to list
