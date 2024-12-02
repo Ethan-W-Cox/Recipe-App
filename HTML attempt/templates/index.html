@@ -12,14 +12,16 @@
         <span class="title">YesChef
             <img src="{{ url_for('static', filename='images/favicon.png') }}" alt="Chef Hat Icon" class="title-icon">
         </span>
-        <!-- Centered Timer Display -->
-        <div class="timer-display">00:00:00</div>
+        
     
         <!-- Pause and Stop Buttons -->
         <button class="timer-control-button" id="pauseButton" onclick="togglePauseTimer()">
             <img src="{{ url_for('static', filename='images/pause_icon.png') }}" alt="Pause" class="icon-pause" id="pauseIcon" width="20px" height="20px">
             <img src="{{ url_for('static', filename='images/play_icon.png') }}" alt="Play" class="icon-play" id="playIcon" width="20px" height="20px" style="display: none;">
         </button>
+
+        <!-- Centered Timer Display -->
+        <div class="timer-display">00:00:00</div>
             
         <button class="timer-control-button" id="stopButton" onclick="stopTimer()">
             <img src="{{ url_for('static', filename='images/stop_icon.png') }}" alt="Stop" width="16px" height="16px">
@@ -71,8 +73,13 @@
             <!-- Right Section for ChatGPT Interaction -->
             <div class="right-section">
                 <h2>Ask Chef</h2>
-                <textarea id="conversationText" readonly></textarea>
-
+                <!-- Chatbox container -->
+                <div id="conversationText" class="chatbox">
+                    <!-- Example Messages -->
+                    <div class="message user-message"></div>
+                    <div class="message chatgpt-message"></div>
+                </div>
+            
                 <div class="interaction-controls">
                     <input type="text" id="questionEntry" placeholder="Ask ChatGPT a question about the recipe">
                     <button onclick="askQuestion()">Ask</button>

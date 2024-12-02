@@ -83,67 +83,69 @@ def transcribe_audio():
 
 #Route to generate TTS audio
 # @app.route('/generate_audio', methods=['POST'])
-@app.route('/generate_audio', methods=['POST'])
-def generate_audio():
-    data = request.get_json()
-    text = data.get('text')
+#@app.route('/generate_audio', methods=['POST'])
+#   def generate_audio():
+    # data = request.get_json()
+    # text = data.get('text')
 
-    try:
-        response = client.audio.speech.create(
-            model="tts-1",
-            voice="nova",
-            input=text
-        )
+    # try:
+    #     response = client.audio.speech.create(
+    #         model="tts-1",
+    #         voice="nova",
+    #         input=text
+    #     )
 
-        # Write audio to a temporary file
-        temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-        temp_audio_file.write(response.content)
-        temp_audio_file.close()
+    #     # Write audio to a temporary file
+    #     temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+    #     temp_audio_file.write(response.content)
+    #     temp_audio_file.close()
 
-        # Return the audio file directly
-        return send_file(temp_audio_file.name, mimetype="audio/mpeg")
+    #     # Return the audio file directly
+    #     return send_file(temp_audio_file.name, mimetype="audio/mpeg")
 
-    except Exception as e:
-        return jsonify({"error": f"Error generating audio: {str(e)}"}), 500
-
-
-
-
+    # except Exception as e:
+    #     return jsonify({"error": f"Error generating audio: {str(e)}"}), 500
 
 
 # Route to fetch and parse recipe ingredients and instructions
+@app.route('/get_recipe', methods=['POST'])
 @app.route('/get_recipe', methods=['POST'])
 def get_recipe():
     data = request.get_json()
     url = data.get('url')
 
-    # Fetch the recipe HTML with headers
-    response_text = get_recipe_html(url)
-    if not response_text:
-        return jsonify({"error": "Error fetching the recipe URL"}), 500
-
-    # Parse the recipe ingredients and instructions
     try:
-        soup = BeautifulSoup(response_text, 'html.parser')
-        
-        # Extract ingredients
-        ingredients = [i.get_text().strip() for i in soup.find_all('li', class_='wprm-recipe-ingredient')]
-        
-        # Extract instructions with fallback for different classes
-        instructions_raw = "\n".join(i.get_text(separator='\n').strip() for i in soup.find_all('div', class_='wprm-recipe-instruction-text'))
-        if not instructions_raw:  # Fallback in case the specific class is not found
-            instructions_raw = "\n".join(i.get_text(separator='\n').strip() for i in soup.find_all('p'))
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
 
-        # Send instructions to ChatGPT for formatting using CHATGPT_MESSAGES
-        formatted_instructions = format_instructions_with_chatgpt(instructions_raw)
+        # Parse the HTML
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Remove unnecessary tags like <script>, <style>, etc.
+        for script_or_style in soup(["script", "style", "header", "footer", "nav"]):
+            script_or_style.decompose()
+
+        # Extract visible text
+        all_text = soup.get_text(separator="\n")
+        raw_text = "\n".join(line.strip() for line in all_text.splitlines() if line.strip())
+
+        # Call GPT-4o-mini to format both ingredients and instructions
+        formatted_data = format_recipe_with_chatgpt(raw_text)
+        if "error" in formatted_data:
+            return jsonify({"error": formatted_data["error"]}), 500
 
         return jsonify({
-            "ingredients": ingredients,
-            "instructions": formatted_instructions
+            "ingredients": formatted_data["ingredients"],
+            "instructions": formatted_data["instructions"]
         })
 
     except Exception as e:
-        return jsonify({"error": f"Error parsing recipe: {str(e)}"}), 500
+        print(f"Error in /get_recipe: {e}")
+        return jsonify({"error": "An error occurred while parsing the recipe."}), 500
+
 
 # Route to handle question sending to ChatGPT
 @app.route('/ask_question', methods=['POST'])
@@ -173,9 +175,6 @@ def ask_question():
         return jsonify({"error": f"Error with ChatGPT request: {str(e)}"}), 500
 
 
-
-
-
 def get_recipe_html(url):
     # Use a session and headers to mimic a real browser request
     session = requests.Session()
@@ -194,24 +193,48 @@ def get_recipe_html(url):
         print(f"Error fetching the URL: {e}")
         return None
 
-def format_instructions_with_chatgpt(instructions):
-
-    print(instructions)
-    CHATGPT_MESSAGES.append({"role": "user", "content": instructions})
+def format_recipe_with_chatgpt(raw_text):
     try:
+        # Create a single prompt to extract both ingredients and instructions
+        prompt = (
+            "You are a helpful assistant for formatting recipes. Do not use markdown. Format the provided recipe based on the provided text. Do not title the sections.\n"
+            "Provide a bulleted list of ingredients in the following format: '- Ingredient' newline '- Ingredient' newline '- Ingredient' and so on. "
+            "Number the steps clearly in the following format: 1. 'instructions for step 1' newline 2. 'instructions for step 2' newline and so on."
+            "Make sure the instructions match the original instructions from the raw text."
+            "Here is the recipe text:"
+            f"{raw_text}"
+        )
+
+        # Call the OpenAI model
         completion = client.chat.completions.create(
-            model="gpt-4o-mini", 
-            messages=CHATGPT_MESSAGES,
+            model="gpt-4o-mini",
+            messages = CHATGPT_MESSAGES + [
+                {"role": "system", "content": "You are a helpful assistant for formatting recipes."},
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=2048
         )
-        message = completion.choices[0].message
-        CHATGPT_MESSAGES.append(message)
-        return message.content
-    except Exception as e:
-        print(f"Error formatting instructions with ChatGPT: {e}")
-        return instructions  # Fallback to raw instructions if there's an error 
-    
 
+        # Extract the formatted response
+        response_content = completion.choices[0].message.content.strip()
+        # Parse the response into ingredients and instructions
+        ingredients = ""
+        instructions = ""
+        sections = response_content.split("\n\n")  # Assuming GPT uses double newlines to separate sections
+        
+        ingredients = sections[0]
+        instructions = sections[1]
+
+        # Add ingredients and instructions to context
+        CHATGPT_MESSAGES.append({"role": "assistant", "content": instructions})
+        CHATGPT_MESSAGES.append({"role": "assistant", "content": ingredients})
+        return {
+            "ingredients": ingredients,  # Convert to list
+            "instructions": instructions  # Convert to list
+        }
+    except Exception as e:
+        print(f"Error formatting recipe with ChatGPT: {e}")
+        return {"error": "An error occurred while formatting the recipe."}
 
 
 if __name__ == '__main__':
