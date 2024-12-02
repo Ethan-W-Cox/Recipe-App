@@ -20,7 +20,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 whisperModel = whisper.load_model("tiny.en")
 
 PORCUPINE_ACCESS_KEY = PICOVOICE_ACCESS_KEY
-KEYWORD_PATH = ["Hey-chef_en_windows_v3_0_0.ppn"]
+KEYWORD_PATH = ["HTML attempt/Hey-chef_en_windows_v3_0_0.ppn"]
 
 
 
