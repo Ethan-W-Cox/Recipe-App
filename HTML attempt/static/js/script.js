@@ -5,10 +5,39 @@ let timerInterval; // Holds the timer interval
 let timerDisplay =  document.querySelector('.timer-display'); // Reference to display the timer in the title bar
 let isPaused = false; // Tracks the pause state
 let remainingTime = 0; // Tracks remaining time when paused
+let testing = true
 
 // Create a global audio object for the alarm
 const alarmSound = new Audio('/static/audio/alarm.mp3');
 alarmSound.loop = true; // Loop the alarm sound continuously
+
+
+
+async function fetchData() {
+    try {
+        const response = await fetch('/tell_app_to_start_recording', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            toggleRecording()
+        } else {
+            console.error('Server error:', response.status);
+        }
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+// Call the function to fetch data
+fetchData();
+
+
+// BELOW IS CODE FROM BEFORE
 
 // Function to fetch and parse recipe from a URL
 async function fetchRecipe() {

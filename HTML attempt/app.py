@@ -10,6 +10,7 @@ import pvporcupine
 import pyaudio
 import struct
 import os
+import time
 
 app = Flask(__name__)
 from secret import OPENAI_API_KEY
@@ -22,29 +23,34 @@ whisperModel = whisper.load_model("tiny.en")
 PORCUPINE_ACCESS_KEY = PICOVOICE_ACCESS_KEY
 KEYWORD_PATH = ["HTML attempt/Hey-chef_en_windows_v3_0_0.ppn"]
 
-
+WAKE_WORD_COOLDOWN = 1.0
+last_detected_time = 0  # Tracks the last time the wake word was detected
 
 def porcupine_listener():
     porcupine = pvporcupine.create(access_key=PORCUPINE_ACCESS_KEY, keyword_paths=KEYWORD_PATH)
     pa = pyaudio.PyAudio()
-    previousAudio = ""
     audio_stream = pa.open(
                     rate=porcupine.sample_rate,
                     channels=1,
                     format=pyaudio.paInt16,
                     input=True,
                     frames_per_buffer=porcupine.frame_length)
-    
+
+    global last_detected_time  # Ensure the variable is accessible within the function
+
     try:
         while True:
             keyword = audio_stream.read(porcupine.frame_length)
             keyword = struct.unpack_from("h" * porcupine.frame_length, keyword)
             keyword_index = porcupine.process(keyword)
-            if keyword_index == 0 and keyword != previousAudio:
-                print("Wake word detected!")
-                previousAudio = keyword
-                # Trigger a response or set a flag here
-                # Example: Send a signal or update a variable for the Flask app to use
+
+            if keyword_index == 0:
+                current_time = time.time()
+                # Check if the cooldown period has passed
+                if current_time - last_detected_time > WAKE_WORD_COOLDOWN:
+                    print("Wake word detected!")
+                    last_detected_time = current_time  # Update the last detected time
+                    make_app_record()
     finally:
         audio_stream.close()
         pa.terminate()
@@ -60,6 +66,10 @@ listener_thread.start()
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/tell_app_to_start_recording', methods=['POST'])
+def make_app_record():
+    return jsonify(''), 200
 
 
 # Route to transcribe audio and send the transcription to ChatGPT
