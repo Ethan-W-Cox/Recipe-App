@@ -12,32 +12,27 @@ const alarmSound = new Audio('/static/audio/alarm.mp3');
 alarmSound.loop = true; // Loop the alarm sound continuously
 
 
+const socket = io();
 
-async function fetchData() {
-    try {
-        const response = await fetch('/tell_app_to_start_recording', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
+socket.on('connect', () => {
+    console.log('=== CLIENT: CONNECTED TO SERVER ===');  // Making this more visible
+});
 
-        if (response.ok) {
-            const data = await response.json();
-            toggleRecording()
-        } else {
-            console.error('Server error:', response.status);
-        }
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
-}
+socket.on('connection_response', (data) => {
+    console.log('=== SERVER RESPONSE:', data.message, '===');
+});
 
-// Call the function to fetch data
-fetchData();
+socket.on('start_message', function(data) {
+    console.log('Received message from server:', data.data);
+    isRecording = false;
+    toggleRecording();
+});
 
-
-// BELOW IS CODE FROM BEFORE
+socket.on('stop_message', function(data) {
+    console.log('Received message from server:', data.data);
+    isRecording = true;
+    toggleRecording();
+});
 
 // Function to fetch and parse recipe from a URL
 async function fetchRecipe() {
@@ -193,12 +188,44 @@ async function generateAudioForResponse(responseText) {
     }
 }
 
+async function startRecording() {
+    const recordButton = document.getElementById("recordButton");
+
+    isRecording = true;
+    recordButton.classList.remove("inactive");
+    recordButton.classList.add("active");
+
+    // Request microphone access
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+    mediaRecorder.start();
+};
+
+async function stopRecording() {
+    const recordButton = document.getElementById("recordButton");
+
+    isRecording = false;
+    recordButton.classList.remove("active");
+    recordButton.classList.add("inactive");
+
+    mediaRecorder.stop();
+    
+    mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        await sendAudioForTranscription(audioBlob);
+    }
+};
+
 // Function to toggle recording audio with the microphone
 async function toggleRecording() {
     const recordButton = document.getElementById("recordButton");
 
     if (!isRecording) {
         // Start recording
+        console.log("I'm starting recording")
         isRecording = true;
         recordButton.classList.remove("inactive");
         recordButton.classList.add("active");

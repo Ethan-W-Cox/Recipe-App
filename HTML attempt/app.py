@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_file
+from flask_socketio import SocketIO, emit
+from flask_cors import CORS
 import tempfile
 import requests
 from bs4 import BeautifulSoup
@@ -13,6 +15,16 @@ import os
 import time
 
 app = Flask(__name__)
+
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+# Initialize SocketIO with CORS settings
+socketio = SocketIO(app, 
+    cors_allowed_origins="*",
+    async_mode='threading',
+    logger=True,
+    engineio_logger=True
+)
 from secret import OPENAI_API_KEY
 from secret import PICOVOICE_ACCESS_KEY
 from config import CHATGPT_MESSAGES  # Import CHATGPT_MESSAGES from external config
@@ -21,13 +33,15 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 whisperModel = whisper.load_model("tiny.en")
 
 PORCUPINE_ACCESS_KEY = PICOVOICE_ACCESS_KEY
-KEYWORD_PATH = ["HTML attempt/Hey-chef_en_windows_v3_0_0.ppn"]
+KEYWORD_PATH1 = "Hey-chef_en_windows_v3_0_0.ppn"
+KEYWORD_PATH2 = "I--m-done_en_windows_v3_0_0.ppn"
+HELP = [KEYWORD_PATH1, KEYWORD_PATH2]
 
 WAKE_WORD_COOLDOWN = 1.0
 last_detected_time = 0  # Tracks the last time the wake word was detected
 
 def porcupine_listener():
-    porcupine = pvporcupine.create(access_key=PORCUPINE_ACCESS_KEY, keyword_paths=KEYWORD_PATH)
+    porcupine = pvporcupine.create(access_key=PORCUPINE_ACCESS_KEY, keyword_paths=[KEYWORD_PATH1, KEYWORD_PATH2])
     pa = pyaudio.PyAudio()
     audio_stream = pa.open(
                     rate=porcupine.sample_rate,
@@ -48,9 +62,16 @@ def porcupine_listener():
                 current_time = time.time()
                 # Check if the cooldown period has passed
                 if current_time - last_detected_time > WAKE_WORD_COOLDOWN:
-                    print("Wake word detected!")
                     last_detected_time = current_time  # Update the last detected time
-                    make_app_record()
+                    send_message()
+                    print("wake word")
+            if keyword_index == 1:
+                current_time = time.time()
+
+                if current_time - last_detected_time > WAKE_WORD_COOLDOWN:
+                    last_detected_time = current_time  # Update the last detected time
+                    stop_message()
+                    print("Stop word")
     finally:
         audio_stream.close()
         pa.terminate()
@@ -67,9 +88,20 @@ listener_thread.start()
 def index():
     return render_template('index.html')
 
-@app.route('/tell_app_to_start_recording', methods=['POST'])
-def make_app_record():
-    return jsonify(''), 200
+@socketio.on('connect')
+def handle_connect():
+    print('=== NEW CLIENT CONNECTED TO SERVER ===')  # Making this more visible
+    socketio.emit('connection_response', {'message': 'Hello from server!'})  # Emit to client
+
+@app.route('/start_message')
+def send_message():
+    socketio.emit('start_message', {'data': 'starting recording!'})
+    return 'Message sent!'
+
+@app.route('/stop_message')
+def stop_message():
+    socketio.emit('stop_message', {'data': 'stop recording'})
+    return 'Message sent!'
 
 
 # Route to transcribe audio and send the transcription to ChatGPT
@@ -92,29 +124,28 @@ def transcribe_audio():
 
 
 #Route to generate TTS audio
-# @app.route('/generate_audio', methods=['POST'])
-#@app.route('/generate_audio', methods=['POST'])
-#   def generate_audio():
-    # data = request.get_json()
-    # text = data.get('text')
+@app.route('/generate_audio', methods=['POST'])
+def generate_audio():
+    data = request.get_json()
+    text = data.get('text')
 
-    # try:
-    #     response = client.audio.speech.create(
-    #         model="tts-1",
-    #         voice="nova",
-    #         input=text
-    #     )
+    try:
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice="nova",
+            input=text
+        )
 
-    #     # Write audio to a temporary file
-    #     temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-    #     temp_audio_file.write(response.content)
-    #     temp_audio_file.close()
+        # Write audio to a temporary file
+        temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+        temp_audio_file.write(response.content)
+        temp_audio_file.close()
 
-    #     # Return the audio file directly
-    #     return send_file(temp_audio_file.name, mimetype="audio/mpeg")
+        # Return the audio file directly
+        return send_file(temp_audio_file.name, mimetype="audio/mpeg")
 
-    # except Exception as e:
-    #     return jsonify({"error": f"Error generating audio: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Error generating audio: {str(e)}"}), 500
 
 
 # Route to fetch and parse recipe ingredients and instructions
@@ -248,4 +279,4 @@ def format_recipe_with_chatgpt(raw_text):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True, host='127.0.0.1', port=5000)
