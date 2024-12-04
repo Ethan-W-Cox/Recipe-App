@@ -5,10 +5,10 @@
 YesChef simplifies your cooking experience by parsing online recipes, answering your questions, and setting timers for you - all hands-free. Users provide a URL to a recipe. This recipe is then parsed to remove any unnecessary content that is often contained in online recipes and return only the ingredients and instructions. The user can then type or speak any question about the recipe and the answer will be spoken back to them. This response is powered by OpenAI's speech-to-text, text-to-speech, and 4o models. YesChef streamlines the process of deciphering an online recipe page and provides helpful advice and answers during the cooking process, making you the Chef de Cuisine of your kitchen. 
 
 ## Key Features
-1. **Recipe Parsing** Extracts and formats only the essential ingredients and instructions from online recipes.
-2. **Interactive Assistant** Ask questions about your recipe through voice or text commands, and receive detailed written and spoken responses.
-3. **Built-In Timer** Set timers effortlessly with text, voice commands, or manual input.
-4. **Hands-Free Voice Control** Say "Hey Chef" to ask a question, followed by "I'm done" to ask a question hands-free.
+1. **Recipe Parsing**: Extracts and formats only the essential ingredients and instructions from online recipes.
+2. **Interactive Assistant**: Ask questions about your recipe through voice or text commands, and receive detailed written and spoken responses.
+3. **Built-In Timer**: Set timers effortlessly with text, voice commands, or manual input.
+4. **Hands-Free Voice Control**: Say "Hey Chef" to ask a question, followed by "I'm done" to ask a question hands-free.
 
 ## Setup
 To use YesChef, follow these steps:
