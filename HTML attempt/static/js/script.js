@@ -34,6 +34,21 @@ socket.on('stop_message', function(data) {
     toggleRecording();
 });
 
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Check for microphone access
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then((stream) => {
+            console.log("Microphone access granted.");
+            // Microphone is accessible; you can process the stream or store it
+            stream.getTracks().forEach(track => track.stop()); // Stop the tracks if not immediately needed
+        })
+        .catch((error) => {
+            console.error("Microphone access denied:", error);
+            alert("Microphone access is required for this app to function properly. Please enable it in your browser settings.");
+        });
+});
+
 // Function to fetch and parse recipe from a URL
 async function fetchRecipe() {
     const url = document.getElementById("urlEntry").value;
@@ -257,45 +272,101 @@ async function sendAudioForTranscription(audioBlob) {
     const formData = new FormData();
     formData.append("audio", audioBlob);
 
-    const response = await fetch('/transcribe_audio', {
-        method: 'POST',
-        body: formData
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-        alert(data.error);
-    } else {
-        const transcription = data.transcription;
-
-        // Display transcription in chatbox
-        const conversationBox = document.getElementById("conversationText");
-        conversationBox.value += `User: ${transcription}\n`;
-        conversationBox.scrollTop = conversationBox.scrollHeight;
-
-        // Send transcription to ChatGPT
-        const response = await fetch('/ask_question', {
+    try {
+        const response = await fetch('/transcribe_audio', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question: transcription })
+            body: formData
         });
 
-        const chatData = await response.json();
+        const data = await response.json();
+        //console.log("Transcription result:", data); // Log the transcription result
 
-        if (chatData.timer_duration) {
-            startCountdown(chatData.timer_duration);
-        } else if (chatData.response) {
-            conversationBox.value += `ChatGPT: ${chatData.response}\n\n`;
-
-            // Trigger TTS for spoken responses
-            generateAudioForResponse(chatData.response);
+        if (data.error) {
+            alert(data.error);
         } else {
-            conversationBox.value += `ChatGPT: Sorry, I couldn't understand that.\n\n`;
+            const transcription = data.transcription;
+            //console.log("Transcribed text:", transcription); // Log transcribed text
+
+            // Display the user's question in the chatbox
+            const conversationBox = document.getElementById("conversationText");
+            const userMessage = document.createElement("div");
+            userMessage.className = "message user-message";
+            userMessage.textContent = transcription; // Display transcribed question
+            conversationBox.appendChild(userMessage);
+
+            // Scroll to the bottom of the chatbox
+            conversationBox.scrollTop = conversationBox.scrollHeight;
+
+            // Send transcription to ChatGPT
+            const chatResponse = await fetch('/ask_question', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: transcription })
+            });
+
+            const chatData = await chatResponse.json();
+            //console.log("ChatGPT response:", chatData); // Log ChatGPT response
+
+            // Check if ChatGPT provided a timer duration
+            if (chatData.timer_duration) {
+                //console.log("Starting timer for:", chatData.timer_duration, "seconds");
+                startCountdown(chatData.timer_duration); // Start the timer
+
+                // Display the timer message in the chatbox
+                const chatMessage = document.createElement("div");
+                chatMessage.className = "message chatgpt-message";
+
+                // Format and display the timer duration message
+                const hours = Math.floor(chatData.timer_duration / 3600);
+                const minutes = Math.floor((chatData.timer_duration % 3600) / 60);
+                const seconds = chatData.timer_duration % 60;
+
+                // Create a human-readable duration string
+                const durationMessage = 
+                    `${hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''} ` : ''}` +
+                    `${minutes > 0 ? `${minutes} minute${minutes > 1 ? 's' : ''} ` : ''}` +
+                    `${seconds > 0 ? `${seconds} second${seconds > 1 ? 's' : ''}` : ''}`.trim();
+
+                const timerMessage = `Timer started for ${durationMessage.trim()}.`;
+                chatMessage.textContent = timerMessage;
+
+                // Append the message to the chatbox
+                const conversationBox = document.getElementById("conversationText");
+                conversationBox.appendChild(chatMessage);
+            } else if (chatData.response) {
+                // Display ChatGPT's response in the chatbox
+                const chatMessage = document.createElement("div");
+                chatMessage.className = "message chatgpt-message";
+                chatMessage.textContent = chatData.response; // ChatGPT response
+                conversationBox.appendChild(chatMessage);
+            } else {
+                // Handle case where no response is received
+                const noResponseMessage = document.createElement("div");
+                noResponseMessage.className = "message chatgpt-message";
+                noResponseMessage.textContent = "Sorry, I couldn't understand that.";
+                conversationBox.appendChild(noResponseMessage);
+            }
+
+            // Scroll to the bottom of the chatbox
+            conversationBox.scrollTop = conversationBox.scrollHeight;
         }
+    } catch (error) {
+        console.error("Error processing audio transcription:", error);
+
+        // Display error message in the chatbox
+        const conversationBox = document.getElementById("conversationText");
+        const errorMessage = document.createElement("div");
+        errorMessage.className = "message chatgpt-message";
+        errorMessage.textContent = "An error occurred while processing your request.";
+        conversationBox.appendChild(errorMessage);
+
+        // Scroll to the bottom of the chatbox
         conversationBox.scrollTop = conversationBox.scrollHeight;
     }
 }
+
+
+
 
 // allows user to press enter to submit instead of just the buttons
 document.addEventListener('DOMContentLoaded', () => {

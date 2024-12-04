@@ -124,32 +124,31 @@ def transcribe_audio():
 
 
 #Route to generate TTS audio
-@app.route('/generate_audio', methods=['POST'])
-def generate_audio():
-    data = request.get_json()
-    text = data.get('text')
+# @app.route('/generate_audio', methods=['POST'])
+# def generate_audio():
+#     data = request.get_json()
+#     text = data.get('text')
 
-    try:
-        response = client.audio.speech.create(
-            model="tts-1",
-            voice="nova",
-            input=text
-        )
+#     try:
+#         response = client.audio.speech.create(
+#             model="tts-1",
+#             voice="nova",
+#             input=text
+#         )
 
-        # Write audio to a temporary file
-        temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-        temp_audio_file.write(response.content)
-        temp_audio_file.close()
+#         # Write audio to a temporary file
+#         temp_audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+#         temp_audio_file.write(response.content)
+#         temp_audio_file.close()
 
-        # Return the audio file directly
-        return send_file(temp_audio_file.name, mimetype="audio/mpeg")
+#         # Return the audio file directly
+#         return send_file(temp_audio_file.name, mimetype="audio/mpeg")
 
-    except Exception as e:
-        return jsonify({"error": f"Error generating audio: {str(e)}"}), 500
+#     except Exception as e:
+#         return jsonify({"error": f"Error generating audio: {str(e)}"}), 500
 
 
 # Route to fetch and parse recipe ingredients and instructions
-@app.route('/get_recipe', methods=['POST'])
 @app.route('/get_recipe', methods=['POST'])
 def get_recipe():
     data = request.get_json()
@@ -279,4 +278,4 @@ def format_recipe_with_chatgpt(raw_text):
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='127.0.0.1', port=5000)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
