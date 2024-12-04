@@ -5,3 +5,7 @@ __pycache__/
 # Ignore environment variables or sensitive data
 .env
 secret.py
+HTML attempt/secret.py
+
+# Ignore googleTTS.py
+googleTTS.py
