@@ -11,9 +11,11 @@ import threading
 import pvporcupine
 import pyaudio
 import struct
-import os
 import time
 
+from secret import OPENAI_API_KEY
+from secret import PICOVOICE_ACCESS_KEY
+from config import CHATGPT_MESSAGES  # Import CHATGPT_MESSAGES from external config
 app = Flask(__name__)
 
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -25,14 +27,10 @@ socketio = SocketIO(app,
     logger=True,
     engineio_logger=True
 )
-from secret import OPENAI_API_KEY
-from secret import PICOVOICE_ACCESS_KEY
-from config import CHATGPT_MESSAGES  # Import CHATGPT_MESSAGES from external config
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 whisperModel = whisper.load_model("tiny.en")
 
-PORCUPINE_ACCESS_KEY = PICOVOICE_ACCESS_KEY
 KEYWORD_PATH1 = "Hey-chef_en_windows_v3_0_0.ppn"
 KEYWORD_PATH2 = "I--m-done_en_windows_v3_0_0.ppn"
 HELP = [KEYWORD_PATH1, KEYWORD_PATH2]
@@ -41,7 +39,7 @@ WAKE_WORD_COOLDOWN = 1.0
 last_detected_time = 0  # Tracks the last time the wake word was detected
 
 def porcupine_listener():
-    porcupine = pvporcupine.create(access_key=PORCUPINE_ACCESS_KEY, keyword_paths=[KEYWORD_PATH1, KEYWORD_PATH2])
+    porcupine = pvporcupine.create(access_key=PICOVOICE_ACCESS_KEY, keyword_paths=[KEYWORD_PATH1, KEYWORD_PATH2])
     pa = pyaudio.PyAudio()
     audio_stream = pa.open(
                     rate=porcupine.sample_rate,
