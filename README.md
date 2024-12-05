@@ -42,8 +42,6 @@ To use YesChef, follow these steps:
 - Use **"Hey Chef"** to activate the assistant.
 - Use **"I'm done"** to finish your request. 
 
----
-
 ## Troubleshooting
 
 ### Microphone Access:
