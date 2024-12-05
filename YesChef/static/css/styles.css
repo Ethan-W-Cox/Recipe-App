@@ -56,14 +56,14 @@ body {
     background-color: #43cb63;
 }
 
-/* Main container styling */
+/* General container styling */
 .container {
-    padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    width: 100%;
     margin: 0 auto;
+    padding: 20px;
+    height: 100vh; /* Take the full viewport height */
     box-sizing: border-box;
 }
 
@@ -115,7 +115,7 @@ button.parse-button:active {
     display: flex;
     gap: 20px;
     width: 100%;
-    height: calc(100vh - 160px); /* Fill viewport minus header and URL section */
+    height: calc(100vh - 11%); /* Fill viewport minus header and URL section */
     box-sizing: border-box;
 }
 
@@ -147,6 +147,7 @@ button.parse-button:active {
 
 /* Chatbox Styling */
 .chatbox {
+    font-family: "Roboto", sans-serif;
     background-color: #40444B;
     border-radius: 8px;
     padding: 10px;
@@ -188,6 +189,7 @@ button.parse-button:active {
 
 /* Responsive text area styling for ingredients and instructions */
 #ingredientsText, #instructionsText, #conversationText {
+    font-family: "Roboto", sans-serif;
     flex-grow: 1;
     min-height: 150px;
     padding: 10px;
@@ -508,3 +510,54 @@ button:active {
     color: transparent; /* Hide text during animation */
     pointer-events: none; /* Prevent interaction while loading */
 }
+
+
+
+/* Image Button Styling */
+button.image-button {
+    padding: 8px 12px;
+    background-color: #FF6F61; /* Coral accent */
+    color: #FFFFFF;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+button.image-button:hover {
+    background-color: #E64B3B; /* Darker coral for hover */
+}
+
+button.image-button:active {
+    background-color: #C44131; /* Muted coral for active */
+}
+
+/* Container for input with thumbnail */
+.input-with-thumbnail {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* Input field */
+.input-with-thumbnail input {
+    width: 100%;
+    padding-right: 40px; /* Add space for the thumbnail */
+    padding-left: 10px; /* Optional: Ensure consistent padding */
+    box-sizing: border-box;
+}
+
+/* Thumbnail icon */
+.thumbnail-icon {
+    position: absolute;
+    right: 10px; /* Align with the right side */
+    width: 30px; /* Adjust the size of the thumbnail */
+    height: 30px;
+    border-radius: 5px; /* Make it circular for a modern look */
+    object-fit: cover; /* Ensure the image is cropped nicely */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+    cursor: pointer; /* Indicate interactivity if needed */
+}
+

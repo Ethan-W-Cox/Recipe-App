@@ -47,16 +47,25 @@
     </div>
 
     <div class="container">
-        <!-- URL Entry Section -->
-        <div class="url-section">
-            <input type="text" id="urlEntry" placeholder="Enter Recipe URL">
-            <button onclick="fetchRecipe()" class="parse-button">Parse Recipe</button>
-        </div>
+          
 
         <!-- Main Content Area with Left and Right Sections -->
         <div class="main-content">
             <!-- Left Section for Ingredients and Instructions -->
             <div class="left-section">
+                <!-- URL and Image Entry Section -->
+                <div class="url-section">
+                    <input type="text" id="urlEntry" placeholder="Enter Recipe URL">
+                    <img id="uploadedThumbnail" src="" alt="Uploaded Recipe" class="thumbnail-icon" style="display: none;">
+                    <button onclick="fetchRecipe()" class="parse-button">Parse Recipe</button>
+                    <button id="uploadImageButton" class="image-button">Image</button>
+                </div>
+                
+                <!-- Thumbnail Container -->
+                <div id="thumbnailContainer" style="display: none;">
+                    <img id="thumbnail" alt="Recipe Image Thumbnail">
+                </div> 
+                
                 <!-- Ingredients Section -->
                 <div class="ingredients-section">   
                     <h2>Ingredients</h2>
@@ -72,7 +81,6 @@
 
             <!-- Right Section for ChatGPT Interaction -->
             <div class="right-section">
-                <h2>Ask Chef</h2>
                 <!-- Chatbox container -->
                 <div id="conversationText" class="chatbox">
                     <!-- Example Messages -->
@@ -93,5 +101,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/image.js') }}"></script>
 </body>
 </html>

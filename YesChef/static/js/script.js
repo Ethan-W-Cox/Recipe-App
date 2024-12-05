@@ -366,8 +366,6 @@ async function sendAudioForTranscription(audioBlob) {
 }
 
 
-
-
 // allows user to press enter to submit instead of just the buttons
 document.addEventListener('DOMContentLoaded', () => {
     // Set up "Enter" key event for URL entry
