@@ -13,15 +13,15 @@ YesChef simplifies your cooking experience by parsing online recipes, answering 
 ## Setup
 To use YesChef, follow these steps:
 
-1. **Download the Files**: Download the project files to your desired directory.
+1. **Download the Files**: Download the YesChef project files to your desired directory.
 
-2. **Install Dependencies**: Make sure you have Python installed, along with the required dependencies (`PyQt5`, `pygame`, `requests`, etc.). 
+2. **Install Dependencies**: Make sure you have Python installed, along with the required dependencies. 
 
-3. **Run the Application**:
-- Open a terminal, navigate to the directory containing the files, and run:
+3. **Run the Application**: Open a terminal, navigate to the directory containing the files, and run:
   ```
-  python main.py
+  python app.py
   ```
+4. **Open in a browser**: After running the app, it will be running locally at an address that is displayed in the terminal after running the app.
 
 ## User Guide
 
