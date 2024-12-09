@@ -170,9 +170,9 @@ def get_recipe():
         all_text = soup.get_text(separator="\n")
         raw_text = "\n".join(line.strip() for line in all_text.splitlines() if line.strip())
 
-        # clear message history so that GPT doesn't respond using old info
+        # clear everything but the config in the message history so that GPT doesn't respond using old info
         global CHATGPT_MESSAGES
-        CHATGPT_MESSAGES = []
+        CHATGPT_MESSAGES = CHATGPT_MESSAGES[:1]
 
         # Call GPT-4o-mini to format both ingredients and instructions
         formatted_data = format_recipe_with_chatgpt(raw_text)
