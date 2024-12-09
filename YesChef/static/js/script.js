@@ -339,6 +339,9 @@ async function sendAudioForTranscription(audioBlob) {
                 chatMessage.className = "message chatgpt-message";
                 chatMessage.textContent = chatData.response; // ChatGPT response
                 conversationBox.appendChild(chatMessage);
+
+                // Generate audio for ChatGPT's response
+                generateAudioForResponse(chatData.response);
             } else {
                 // Handle case where no response is received
                 const noResponseMessage = document.createElement("div");
